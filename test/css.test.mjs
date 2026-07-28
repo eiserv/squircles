@@ -7,6 +7,7 @@ import {
   resolveRadiusFromComputed,
   resolveSmoothingFromComputed,
 } from "../dist/css/index.js";
+import { isVoidElement } from "../dist/dom/index.js";
 
 /** Minimal stand-in for CSSStyleDeclaration. */
 function styles(values) {
@@ -218,4 +219,16 @@ test("falls back to transparent and none for a bare element", () => {
     backgroundRepeat: "repeat",
     transition: "none",
   });
+});
+
+test("recognises void elements", () => {
+  for (const tag of ["img", "input", "br", "hr", "IMG", "INPUT"]) {
+    assert.equal(isVoidElement(tag), true, tag);
+  }
+});
+
+test("does not treat container elements as void", () => {
+  for (const tag of ["div", "button", "a", "span", "section"]) {
+    assert.equal(isVoidElement(tag), false, tag);
+  }
 });
