@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   parseBoxShadow,
+  readBorderFromComputed,
+  readSurfaceFromComputed,
   resolveRadiusFromComputed,
   resolveSmoothingFromComputed,
 } from "../dist/css/index.js";
@@ -144,4 +146,76 @@ test("handles negative offsets", () => {
   assert.deepEqual(parseBoxShadow("rgb(0, 0, 0) -2px -4px 8px 0px"), [
     { color: "rgb(0, 0, 0)", offsetX: -2, offsetY: -4, blur: 8, spread: 0 },
   ]);
+});
+
+test("reads a solid border", () => {
+  assert.deepEqual(
+    readBorderFromComputed(
+      styles({
+        "border-top-width": "1.5px",
+        "border-top-style": "solid",
+        "border-top-color": "rgb(229, 231, 235)",
+      }),
+    ),
+    { width: 1.5, color: "rgb(229, 231, 235)" },
+  );
+});
+
+test("reports no border for unsupported styles", () => {
+  for (const style of ["none", "dashed", "dotted", "double"]) {
+    assert.deepEqual(
+      readBorderFromComputed(
+        styles({
+          "border-top-width": "2px",
+          "border-top-style": style,
+          "border-top-color": "rgb(0, 0, 0)",
+        }),
+      ),
+      { width: 0, color: "rgb(0, 0, 0)" },
+      style,
+    );
+  }
+});
+
+test("reports no border for a zero width", () => {
+  assert.equal(
+    readBorderFromComputed(
+      styles({ "border-top-width": "0px", "border-top-style": "solid" }),
+    ).width,
+    0,
+  );
+});
+
+test("copies the background longhands and the transition", () => {
+  assert.deepEqual(
+    readSurfaceFromComputed(
+      styles({
+        "background-color": "rgb(25, 45, 115)",
+        "background-image": "linear-gradient(rgb(1, 2, 3), rgb(4, 5, 6))",
+        "background-size": "cover",
+        "background-position": "50% 50%",
+        "background-repeat": "no-repeat",
+        transition: "background-color 150ms ease",
+      }),
+    ),
+    {
+      backgroundColor: "rgb(25, 45, 115)",
+      backgroundImage: "linear-gradient(rgb(1, 2, 3), rgb(4, 5, 6))",
+      backgroundSize: "cover",
+      backgroundPosition: "50% 50%",
+      backgroundRepeat: "no-repeat",
+      transition: "background-color 150ms ease",
+    },
+  );
+});
+
+test("falls back to transparent and none for a bare element", () => {
+  assert.deepEqual(readSurfaceFromComputed(styles({})), {
+    backgroundColor: "transparent",
+    backgroundImage: "none",
+    backgroundSize: "auto",
+    backgroundPosition: "0% 0%",
+    backgroundRepeat: "repeat",
+    transition: "none",
+  });
 });

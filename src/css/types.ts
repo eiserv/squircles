@@ -13,3 +13,17 @@ export type SquircleShadow = Readonly<{
   blur: number;
   spread: number;
 }>;
+
+export type SquircleBorder = Readonly<{
+  width: number;
+  color: string;
+}>;
+
+export type SquircleSurface = Readonly<{
+  backgroundColor: string;
+  backgroundImage: string;
+  backgroundSize: string;
+  backgroundPosition: string;
+  backgroundRepeat: string;
+  transition: string;
+}>;
