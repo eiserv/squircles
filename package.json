@@ -1,0 +1,63 @@
+{
+  "name": "squircles",
+  "version": "0.1.0",
+  "description": "Small, dependency-free Figma-style squircle geometry with optional React components.",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "docs",
+    "examples",
+    "LICENSE",
+    "NOTICE",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "import": "./dist/react/index.js"
+    }
+  },
+  "scripts": {
+    "clean": "node scripts/clean.mjs",
+    "build": "npm run clean && tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && node --test",
+    "check": "npm run typecheck && npm test && npm pack --dry-run --cache .npm-cache",
+    "visual:fixture": "npm run build && node scripts/create-visual-fixture.mjs"
+  },
+  "keywords": [
+    "figma",
+    "react",
+    "squircle",
+    "corner-smoothing",
+    "typescript"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "typescript": "^6.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

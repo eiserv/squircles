@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.artifacts/
+.npm-cache/
+*.tgz
+*.tsbuildinfo
+.DS_Store
