@@ -13,10 +13,12 @@ const CustomLink = forwardRef<
 });
 
 const button = (
-  <Squircle as="button" type="submit" radius={8} strokeWidth={1}>
+  <Squircle as="button" type="submit" radius={8} smoothing={0.8}>
     Submit
   </Squircle>
 );
+
+const image = <Squircle as="img" src="/a.jpg" alt="Ein Bild" radius={16} />;
 
 const link = (
   <Squircle as={CustomLink} href="/kontakt/" radius={8}>
@@ -27,10 +29,15 @@ const link = (
 type InferredButtonProps = ComponentPropsWithoutRef<typeof Squircle>;
 const defaultProps: InferredButtonProps = { radius: 12 };
 
+// @ts-expect-error Paint is expressed in CSS, not in props.
+const invalidPaint = <Squircle as="button" fill="#192d73" />;
+
 // @ts-expect-error A native button does not accept href.
 const invalidButton = <Squircle as="button" href="/wrong" />;
 
 void button;
 void defaultProps;
+void image;
 void invalidButton;
+void invalidPaint;
 void link;

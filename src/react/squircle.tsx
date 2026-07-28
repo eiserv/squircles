@@ -1,23 +1,21 @@
 import {
+  createElement,
   forwardRef,
+  useEffect,
   useImperativeHandle,
   useMemo,
   useRef,
   type ComponentPropsWithoutRef,
   type ComponentPropsWithRef,
-  type CSSProperties,
   type ElementType,
   type ForwardedRef,
   type ReactElement,
   type ReactNode,
 } from "react";
-import {
-  createSquirclePath,
-  resolveSquircleRadii,
-  type SquircleRadius,
-} from "../geometry.js";
-import { SquircleSurface } from "./squircle-surface.js";
-import { useElementSize } from "./use-element-size.js";
+import { applySquircle } from "../dom/apply-squircle.js";
+import type { SquircleGeometryOptions } from "../dom/layers.js";
+import { isVoidElement } from "../dom/void-elements.js";
+import type { SquircleRadius } from "../geometry.js";
 
 type PolymorphicRef<Component extends ElementType> =
   ComponentPropsWithRef<Component>["ref"];
@@ -25,19 +23,16 @@ type PolymorphicRef<Component extends ElementType> =
 type SquircleOwnProps = {
   as?: ElementType;
   children?: ReactNode;
+  /** Overrides the element's own `border-radius`. */
   radius?: SquircleRadius;
+  /** Overrides the element's own `--squircle-smoothing`. */
   smoothing?: number;
   preserveSmoothing?: boolean;
-  fill?: string;
-  stroke?: string;
-  strokeWidth?: number;
   /**
-   * Clips child content to the outer squircle. Keep this false on controls
+   * Additionally clips the element's children. Keep this false on controls
    * whose focus outline must remain visible.
    */
   clipContent?: boolean;
-  surfaceClassName?: string;
-  surfaceStyle?: CSSProperties;
 };
 
 export type SquircleProps<Component extends ElementType = "div"> =
@@ -55,31 +50,14 @@ export type SquircleComponent = <Component extends ElementType = "div">(
   },
 ) => ReactElement | null;
 
-function mergeBoxShadows(
-  fallback: string | undefined,
-  boxShadow: CSSProperties["boxShadow"],
-): string | undefined {
-  if (!fallback) {
-    return boxShadow;
-  }
-
-  return boxShadow ? `${fallback}, ${boxShadow}` : fallback;
-}
-
 function SquircleImplementation(
   {
     as,
     children,
-    radius = 0,
-    smoothing = 1,
-    preserveSmoothing = false,
-    fill = "transparent",
-    stroke = "transparent",
-    strokeWidth = 0,
-    clipContent = false,
-    surfaceClassName,
-    surfaceStyle,
-    style,
+    radius,
+    smoothing,
+    preserveSmoothing,
+    clipContent,
     ...elementProps
   }: SquircleProps<ElementType>,
   forwardedRef: ForwardedRef<HTMLElement>,
@@ -87,73 +65,30 @@ function SquircleImplementation(
   const Element: ElementType = as ?? "div";
   const ref = useRef<HTMLElement>(null);
   useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
-  const size = useElementSize(ref);
-  const ready = size !== null;
-  const radii = useMemo(() => resolveSquircleRadii(radius), [radius]);
-  const clipPath = useMemo(
-    () =>
-      clipContent && size
-        ? `path('${createSquirclePath({
-            width: size.width,
-            height: size.height,
-            radius,
-            smoothing,
-            preserveSmoothing,
-          })}')`
-        : undefined,
-    [clipContent, preserveSmoothing, radius, size, smoothing],
+
+  const options = useMemo<SquircleGeometryOptions>(
+    () => ({
+      ...(radius !== undefined ? { radius } : {}),
+      ...(smoothing !== undefined ? { smoothing } : {}),
+      ...(preserveSmoothing !== undefined ? { preserveSmoothing } : {}),
+      ...(clipContent !== undefined ? { clipContent } : {}),
+    }),
+    [clipContent, preserveSmoothing, radius, smoothing],
   );
-  const fallbackRing =
-    !ready && strokeWidth > 0 && stroke !== "transparent"
-      ? `inset 0 0 0 ${strokeWidth}px ${stroke}`
-      : undefined;
 
-  const elementStyle: CSSProperties = {
-    ...style,
-    position: style?.position ?? "relative",
-    isolation: style?.isolation ?? "isolate",
-    backgroundColor: ready ? "transparent" : fill,
-    borderTopLeftRadius: radii.topLeft,
-    borderTopRightRadius: radii.topRight,
-    borderBottomRightRadius: radii.bottomRight,
-    borderBottomLeftRadius: radii.bottomLeft,
-    boxShadow: mergeBoxShadows(fallbackRing, style?.boxShadow),
-    ...(clipContent
-      ? {
-          clipPath,
-          overflow: "hidden",
-        }
-      : {}),
-  };
+  useEffect(() => {
+    const element = ref.current;
+    return element ? applySquircle(element, options) : undefined;
+  }, [options]);
 
-  Object.assign(elementStyle, {
-    cornerShape: "squircle",
-  });
+  // The layers are appended imperatively, so a void host stays childless.
+  // createElement with two arguments omits `children` entirely, which JSX
+  // cannot express and which a void element requires.
+  const hostProps = { ref, ...elementProps };
 
-  return (
-    <Element
-      ref={ref}
-      data-squircle-ready={ready ? "" : undefined}
-      style={elementStyle}
-      {...elementProps}
-    >
-      {size ? (
-        <SquircleSurface
-          className={surfaceClassName}
-          radius={radius}
-          smoothing={smoothing}
-          preserveSmoothing={preserveSmoothing}
-          fill={fill}
-          stroke={stroke}
-          strokeWidth={strokeWidth}
-          width={size.width}
-          height={size.height}
-          style={{ zIndex: -1, ...surfaceStyle }}
-        />
-      ) : null}
-      {children}
-    </Element>
-  );
+  return typeof Element === "string" && isVoidElement(Element)
+    ? createElement(Element, hostProps)
+    : createElement(Element, hostProps, children);
 }
 
 export const Squircle = forwardRef<
