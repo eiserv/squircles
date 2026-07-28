@@ -8,6 +8,10 @@ const cases = [
   { width: 48, height: 48, radius: 12, smoothing: 1, strokeWidth: 1 },
   { width: 180, height: 64, radius: 20, smoothing: 1, strokeWidth: 1.5 },
   { width: 240, height: 96, radius: 32, smoothing: 0.8, strokeWidth: 2 },
+  // Card, borderless surface, and pill, matching the new example pages.
+  { width: 260, height: 180, radius: 20, smoothing: 1, strokeWidth: 1 },
+  { width: 260, height: 120, radius: 12, smoothing: 1, strokeWidth: 0 },
+  { width: 120, height: 32, radius: 999, smoothing: 1, strokeWidth: 1 },
 ];
 
 const rows = cases
