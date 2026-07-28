@@ -1,3 +1,4 @@
+export { applySquircle } from "./apply-squircle.js";
 export {
   clearLayers,
   syncLayers,
