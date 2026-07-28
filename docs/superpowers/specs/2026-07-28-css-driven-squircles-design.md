@@ -123,6 +123,12 @@ Documented as limits rather than silently broken:
 - multiple shadows are stacked as a list of `drop-shadow` filters, which is not
   identical to how `box-shadow` composites them
 - semi-transparent borders (see above)
+- `backdrop-filter` — the host is not clipped, so a backdrop filter stays
+  rectangular. Solvable by copying the filter onto the clipped surface layer;
+  deliberately deferred, not attempted.
+- `border-style: dashed` / `dotted` — expressible via `stroke-dasharray`, but
+  the dash rhythm around a smoothed curve would not match what CSS draws.
+  Deliberately deferred. Only `solid` is read.
 
 ## API
 
