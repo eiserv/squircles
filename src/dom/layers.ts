@@ -75,7 +75,19 @@ function readAuthoredStyles(host: HTMLElement): StyleReader {
   const computed = getComputedStyle(host);
   const snapshot = new Map<string, string>();
 
+  // Read the authored transition before suppressing it below.
+  snapshot.set("transition", computed.getPropertyValue("transition"));
+
+  // Lifting an override on a transitioned property makes the browser
+  // interpolate from the override, so a plain read would return the value in
+  // flight rather than the one the author asked for.
+  host.style.setProperty("transition", "none");
+
   for (const property of READ_PROPERTIES) {
+    if (property === "transition") {
+      continue;
+    }
+
     snapshot.set(property, computed.getPropertyValue(property));
   }
 

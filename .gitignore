@@ -1,5 +1,6 @@
 node_modules/
 dist/
+examples/react/main.js
 .artifacts/
 .npm-cache/
 *.tgz

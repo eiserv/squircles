@@ -11,11 +11,23 @@ const types = {
   ".js": "text/javascript; charset=utf-8",
   ".map": "application/json; charset=utf-8",
   ".css": "text/css; charset=utf-8",
+  ".png": "image/png",
+};
+
+const pages = {
+  "/": "examples/playground.html",
+  "/react": "examples/react/index.html",
+  "/react/": "examples/react/index.html",
 };
 
 /** Resolves a request path inside the package, or null if it escapes it. */
 function resolve(requestPath) {
-  const relative = requestPath === "/" ? "examples/playground.html" : requestPath.slice(1);
+  // The React page is served under /react/, so its assets resolve there too.
+  const relative =
+    pages[requestPath] ??
+    (requestPath.startsWith("/react/")
+      ? `examples${requestPath}`
+      : requestPath.slice(1));
   const target = new URL(relative, root);
 
   return target.href.startsWith(root.href) ? target : null;
@@ -51,4 +63,5 @@ const server = createServer(async (request, response) => {
 
 server.listen(port, () => {
   console.log(`squircles playground: http://localhost:${port}/`);
+  console.log(`squircles with React:  http://localhost:${port}/react/`);
 });
