@@ -5,3 +5,11 @@
 export type StyleReader = Readonly<{
   getPropertyValue(property: string): string;
 }>;
+
+export type SquircleShadow = Readonly<{
+  color: string;
+  offsetX: number;
+  offsetY: number;
+  blur: number;
+  spread: number;
+}>;
