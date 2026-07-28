@@ -10,6 +10,33 @@ Small Figma-style squircles for TypeScript and React.
 - rounded/native `corner-shape` fallback during SSR and before hydration;
 - ESM, strict TypeScript, and tree-shakeable entry points.
 
+## What it looks like
+
+`examples/playground.html` draws the same button twice — once through
+`createSquirclePath()`, once with plain `border-radius` — and updates both while
+you move radius, smoothing, size, and stroke width:
+
+```sh
+npm run playground
+```
+
+![The playground with a 200 × 72 button at radius 24: the squircle and the
+border-radius button side by side, their outlines overlaid, and the top left
+corner magnified](docs/media/playground.png)
+
+At button-sized radii the two shapes are close, which is why the overlay and the
+magnified corner are part of the page: they are the honest way to see the
+difference. Note the corner budget in the readout — at radius 24 on a 72px-tall
+button, Figma's constraint already reduces the effective smoothing.
+
+The difference grows with the radius. At a pill radius with `preserveSmoothing`,
+the smoothed ends are visibly flatter than the semicircular `border-radius`
+ends:
+
+![The same playground at 360 × 120 with radius 60 and preserveSmoothing enabled:
+the squircle pill has noticeably flatter ends than the border-radius
+pill](docs/media/smoothing-extremes.png)
+
 ## Why this exists
 
 Figma corner smoothing is not the same shape as `border-radius`. Existing web
@@ -143,6 +170,11 @@ radius={{
 npm install
 npm run check
 ```
+
+`npm run playground` builds the package and serves
+[examples/playground.html](examples/playground.html) on
+<http://localhost:5173/>. `npm run visual:fixture` writes a static
+rasterization fixture to `.artifacts/`.
 
 See [docs/architecture.md](docs/architecture.md) for the rendering rationale
 and constraints. A generic integration example is available in

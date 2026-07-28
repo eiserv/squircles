@@ -28,7 +28,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "npm run build && node --test",
     "check": "npm run typecheck && npm test && npm pack --dry-run --cache .npm-cache",
-    "visual:fixture": "npm run build && node scripts/create-visual-fixture.mjs"
+    "visual:fixture": "npm run build && node scripts/create-visual-fixture.mjs",
+    "playground": "npm run build && node scripts/serve-playground.mjs"
   },
   "keywords": [
     "figma",

@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>squircles playground</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: #f3f5fa;
+        color: #192d73;
+        font: 15px/1.5 system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      main {
+        width: min(1120px, calc(100% - 48px));
+        margin: 40px auto;
+      }
+
+      header {
+        margin-bottom: 28px;
+      }
+
+      h1 {
+        margin: 0 0 6px;
+        font-size: 24px;
+        letter-spacing: -0.01em;
+      }
+
+      header p {
+        margin: 0;
+        max-width: 62ch;
+        color: #52607f;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 260px minmax(0, 1fr);
+        gap: 24px;
+        align-items: start;
+      }
+
+      @media (max-width: 860px) {
+        .layout {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+
+      .panel {
+        border: 1px solid #dce1ed;
+        border-radius: 16px;
+        background: white;
+      }
+
+      .controls {
+        padding: 20px;
+        display: grid;
+        gap: 18px;
+      }
+
+      .control {
+        display: grid;
+        gap: 6px;
+      }
+
+      .control__head {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .control__value {
+        font-weight: 400;
+        font-variant-numeric: tabular-nums;
+        color: #52607f;
+      }
+
+      input[type="range"] {
+        width: 100%;
+        accent-color: #192d73;
+      }
+
+      .toggle {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .toggle input {
+        accent-color: #192d73;
+      }
+
+      .toggle span small {
+        display: block;
+        font-weight: 400;
+        color: #52607f;
+      }
+
+      .stages {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 24px;
+      }
+
+      @media (max-width: 620px) {
+        .stages {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+
+      .stage {
+        display: grid;
+        grid-template-rows: 1fr auto;
+        overflow: hidden;
+      }
+
+      .stage__body {
+        min-height: 200px;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        background-image:
+          linear-gradient(45deg, rgba(25, 45, 115, 0.035) 25%, transparent 25%),
+          linear-gradient(-45deg, rgba(25, 45, 115, 0.035) 25%, transparent 25%),
+          linear-gradient(45deg, transparent 75%, rgba(25, 45, 115, 0.035) 75%),
+          linear-gradient(-45deg, transparent 75%, rgba(25, 45, 115, 0.035) 75%);
+        background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+        background-size: 16px 16px;
+      }
+
+      .stage__caption {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 16px;
+        border-top: 1px solid #e7eaf1;
+        font-size: 13px;
+      }
+
+      .stage__caption b {
+        font-weight: 600;
+      }
+
+      .stage__caption span {
+        color: #52607f;
+      }
+
+      /* Both buttons share every visual token except the corner geometry. */
+      .button {
+        position: relative;
+        display: inline-grid;
+        place-items: center;
+        border: 0;
+        margin: 0;
+        padding: 0 20px;
+        background: transparent;
+        color: white;
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .button__label {
+        position: relative;
+      }
+
+      .button__surface {
+        position: absolute;
+        inset: 0;
+        display: block;
+        overflow: visible;
+        pointer-events: none;
+      }
+
+      .button--radius {
+        background: #192d73;
+        border: 1px solid #edaa2b;
+      }
+
+      .insights {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 240px;
+        gap: 24px;
+        margin-top: 24px;
+      }
+
+      @media (max-width: 620px) {
+        .insights {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+
+      .overlay__body {
+        display: grid;
+        place-items: center;
+        padding: 32px 24px;
+      }
+
+      .overlay__body svg {
+        max-width: 100%;
+        height: auto;
+      }
+
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        padding: 12px 16px;
+        border-top: 1px solid #e7eaf1;
+        font-size: 13px;
+        color: #52607f;
+      }
+
+      .legend--stacked {
+        display: grid;
+        gap: 4px;
+      }
+
+      .legend b {
+        color: #192d73;
+      }
+
+      .swatch {
+        display: inline-block;
+        width: 22px;
+        height: 0;
+        margin-right: 6px;
+        vertical-align: middle;
+        border-top: 2px solid currentColor;
+      }
+
+      .swatch--dashed {
+        border-top-style: dashed;
+      }
+
+      .code {
+        margin-top: 24px;
+        padding: 16px;
+        overflow-x: auto;
+      }
+
+      pre {
+        margin: 0;
+        font: 12px/1.6 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        white-space: pre-wrap;
+        word-break: break-all;
+        color: #2c3a5f;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>squircles playground</h1>
+        <p>
+          The same button, drawn twice. On the left with Figma corner smoothing,
+          on the right with plain <code>border-radius</code>. Move the sliders to
+          see where the two shapes disagree.
+        </p>
+      </header>
+
+      <div class="layout">
+        <form class="panel controls" id="controls">
+          <label class="control">
+            <span class="control__head">
+              Width <span class="control__value" id="width-value"></span>
+            </span>
+            <input type="range" id="width" min="80" max="420" step="1" value="200" />
+          </label>
+
+          <label class="control">
+            <span class="control__head">
+              Height <span class="control__value" id="height-value"></span>
+            </span>
+            <input type="range" id="height" min="32" max="180" step="1" value="72" />
+          </label>
+
+          <label class="control">
+            <span class="control__head">
+              Radius <span class="control__value" id="radius-value"></span>
+            </span>
+            <input type="range" id="radius" min="0" max="90" step="1" value="24" />
+          </label>
+
+          <label class="control">
+            <span class="control__head">
+              Smoothing <span class="control__value" id="smoothing-value"></span>
+            </span>
+            <input type="range" id="smoothing" min="0" max="1" step="0.05" value="1" />
+          </label>
+
+          <label class="control">
+            <span class="control__head">
+              Stroke width <span class="control__value" id="stroke-value"></span>
+            </span>
+            <input type="range" id="stroke" min="0" max="6" step="0.5" value="1" />
+          </label>
+
+          <label class="toggle">
+            <input type="checkbox" id="preserve" />
+            <span>
+              preserveSmoothing
+              <small>Keep the smoothing when a corner runs out of room.</small>
+            </span>
+          </label>
+        </form>
+
+        <div>
+          <section class="stages">
+            <article class="panel stage" id="stage-squircle">
+              <div class="stage__body">
+                <button class="button" type="button" id="squircle-button">
+                  <svg class="button__surface" id="squircle-surface" aria-hidden="true">
+                    <path
+                      id="squircle-path"
+                      fill="#192d73"
+                      stroke="#edaa2b"
+                      shape-rendering="geometricPrecision"
+                    />
+                  </svg>
+                  <span class="button__label">Mehr erfahren</span>
+                </button>
+              </div>
+              <p class="stage__caption">
+                <b>squircles</b>
+                <span>createSquirclePath()</span>
+              </p>
+            </article>
+
+            <article class="panel stage" id="stage-radius">
+              <div class="stage__body">
+                <button class="button button--radius" type="button" id="radius-button">
+                  <span class="button__label">Mehr erfahren</span>
+                </button>
+              </div>
+              <p class="stage__caption">
+                <b>border-radius</b>
+                <span>circular corners</span>
+              </p>
+            </article>
+          </section>
+
+          <section class="insights">
+            <article class="panel stage" id="stage-overlay">
+              <div class="overlay__body">
+                <svg id="overlay-surface" aria-label="Outline comparison"></svg>
+              </div>
+              <p class="legend">
+                <span style="color: #192d73">
+                  <i class="swatch"></i><b>squircle</b> outline
+                </span>
+                <span style="color: #edaa2b">
+                  <i class="swatch swatch--dashed"></i><b>border-radius</b> outline
+                </span>
+              </p>
+            </article>
+
+            <article class="panel stage" id="stage-detail">
+              <div class="overlay__body">
+                <svg id="detail-surface" aria-label="Top left corner, magnified"></svg>
+              </div>
+              <p class="legend legend--stacked">
+                <b>Top left corner, magnified</b>
+                <span>The tinted band is the area corner smoothing adds.</span>
+                <span id="detail-note"></span>
+              </p>
+            </article>
+          </section>
+
+          <section class="panel code">
+            <pre id="output"></pre>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <script type="module">
+      import { createSquirclePath } from "../dist/index.js";
+
+      const form = document.getElementById("controls");
+      const inputs = {
+        width: document.getElementById("width"),
+        height: document.getElementById("height"),
+        radius: document.getElementById("radius"),
+        smoothing: document.getElementById("smoothing"),
+        stroke: document.getElementById("stroke"),
+        preserve: document.getElementById("preserve"),
+      };
+
+      const readouts = {
+        width: document.getElementById("width-value"),
+        height: document.getElementById("height-value"),
+        radius: document.getElementById("radius-value"),
+        smoothing: document.getElementById("smoothing-value"),
+        stroke: document.getElementById("stroke-value"),
+      };
+
+      const squircleButton = document.getElementById("squircle-button");
+      const squircleSurface = document.getElementById("squircle-surface");
+      const squirclePath = document.getElementById("squircle-path");
+      const radiusButton = document.getElementById("radius-button");
+      const overlaySurface = document.getElementById("overlay-surface");
+      const detailSurface = document.getElementById("detail-surface");
+      const detailNote = document.getElementById("detail-note");
+      const output = document.getElementById("output");
+
+      const OVERLAY_WIDTH = 420;
+      const DETAIL_SIZE = 190;
+
+      function render() {
+        const width = Number(inputs.width.value);
+        const height = Number(inputs.height.value);
+        const radius = Number(inputs.radius.value);
+        const smoothing = Number(inputs.smoothing.value);
+        const strokeWidth = Number(inputs.stroke.value);
+        const preserveSmoothing = inputs.preserve.checked;
+
+        readouts.width.textContent = `${width}px`;
+        readouts.height.textContent = `${height}px`;
+        readouts.radius.textContent = `${radius}px`;
+        readouts.smoothing.textContent = smoothing.toFixed(2);
+        readouts.stroke.textContent = `${strokeWidth}px`;
+
+        const path = createSquirclePath({
+          width,
+          height,
+          radius,
+          smoothing,
+          preserveSmoothing,
+          inset: strokeWidth / 2,
+        });
+
+        squircleButton.style.width = `${width}px`;
+        squircleButton.style.height = `${height}px`;
+        squircleSurface.setAttribute("viewBox", `0 0 ${width} ${height}`);
+        squirclePath.setAttribute("d", path);
+        squirclePath.setAttribute("stroke-width", String(strokeWidth));
+
+        radiusButton.style.width = `${width}px`;
+        radiusButton.style.height = `${height}px`;
+        radiusButton.style.borderRadius = `${radius}px`;
+        radiusButton.style.borderWidth = `${strokeWidth}px`;
+
+        renderOverlay({ width, height, radius, smoothing, preserveSmoothing });
+
+        output.textContent = [
+          "createSquirclePath({",
+          `  width: ${width},`,
+          `  height: ${height},`,
+          `  radius: ${radius},`,
+          `  smoothing: ${smoothing},`,
+          preserveSmoothing ? "  preserveSmoothing: true," : null,
+          strokeWidth > 0 ? `  inset: ${strokeWidth / 2},` : null,
+          "})",
+          "",
+          path,
+        ]
+          .filter((line) => line !== null)
+          .join("\n");
+      }
+
+      /**
+       * The path starts on the top edge at `width - reach` of the top right
+       * corner, so the effective reach can be read back from the generated
+       * path instead of recomputing Figma's corner budget here.
+       */
+      function readReach(path, width) {
+        const move = /^M\s+(-?[\d.]+)/.exec(path);
+        return move ? width - Number(move[1]) : 0;
+      }
+
+      /**
+       * Both contours in one coordinate system. With `fills` the areas that
+       * belong to only one of the two shapes stay visible as colored slivers.
+       */
+      function shapes(path, width, height, cappedRadius, highlightDifference) {
+        const roundedRect = (fill) => `
+          <rect
+            x="0"
+            y="0"
+            width="${width}"
+            height="${height}"
+            rx="${cappedRadius}"
+            ry="${cappedRadius}"
+            fill="${fill}"
+            stroke="none"
+          />`;
+
+        return `
+          <path
+            d="${path}"
+            fill="${highlightDifference ? "#c6d0e8" : "rgba(25, 45, 115, .08)"}"
+            stroke="none"
+            shape-rendering="geometricPrecision"
+          />
+          ${highlightDifference ? roundedRect("#ffffff") : ""}
+          <path
+            d="${path}"
+            fill="none"
+            stroke="#192d73"
+            stroke-width="1"
+            vector-effect="non-scaling-stroke"
+            shape-rendering="geometricPrecision"
+          />
+          <rect
+            x="0"
+            y="0"
+            width="${width}"
+            height="${height}"
+            rx="${cappedRadius}"
+            ry="${cappedRadius}"
+            fill="none"
+            stroke="#edaa2b"
+            stroke-width="1"
+            stroke-dasharray="4 3"
+            vector-effect="non-scaling-stroke"
+          />`;
+      }
+
+      function renderOverlay({
+        width,
+        height,
+        radius,
+        smoothing,
+        preserveSmoothing,
+      }) {
+        const path = createSquirclePath({
+          width,
+          height,
+          radius,
+          smoothing,
+          preserveSmoothing,
+        });
+        const cappedRadius = Math.min(radius, width / 2, height / 2);
+        const overlayScale = Math.min(2, OVERLAY_WIDTH / width);
+
+        overlaySurface.setAttribute("viewBox", `0 0 ${width} ${height}`);
+        overlaySurface.setAttribute("width", String(width * overlayScale));
+        overlaySurface.setAttribute("height", String(height * overlayScale));
+        overlaySurface.innerHTML = shapes(path, width, height, cappedRadius);
+
+        // Crop to the top left corner and blow it up to a fixed size.
+        const crop = Math.max(
+          8,
+          Math.min(width / 2, height / 2, cappedRadius * 1.6),
+        );
+        detailSurface.setAttribute("viewBox", `0 0 ${crop} ${crop}`);
+        detailSurface.setAttribute("width", String(DETAIL_SIZE));
+        detailSurface.setAttribute("height", String(DETAIL_SIZE));
+        detailSurface.innerHTML = shapes(
+          path,
+          width,
+          height,
+          cappedRadius,
+          true,
+        );
+
+        const reach = readReach(path, width);
+        const requested = (1 + smoothing) * cappedRadius;
+        const clamped = reach + 0.05 < requested;
+        const budgetNote = !clamped
+          ? ""
+          : preserveSmoothing
+            ? `The corner has no room for the requested ${requested.toFixed(
+                1,
+              )}px, so preserveSmoothing compresses the control points instead of reducing the smoothing.`
+            : `The corner budget capped the requested ${requested.toFixed(
+                1,
+              )}px, which lowers the effective smoothing. preserveSmoothing keeps it.`;
+
+        detailNote.textContent =
+          cappedRadius === 0
+            ? "No radius, no difference."
+            : [
+                `The squircle leaves the edge ${reach.toFixed(1)}px from the`,
+                `corner, border-radius ${cappedRadius.toFixed(1)}px.`,
+                budgetNote,
+              ]
+                .filter(Boolean)
+                .join(" ");
+      }
+
+      form.addEventListener("input", render);
+      render();
+    </script>
+  </body>
+</html>
