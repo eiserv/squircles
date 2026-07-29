@@ -17,11 +17,11 @@ function Demo() {
         <h2>Buttons</h2>
         <div className="row">
           <Squircle as="button" type="button" className="button">
-            Mehr erfahren
+            Learn more
           </Squircle>
 
-          <Squircle as="a" href="#kontakt" className="button button--ghost">
-            Kontakt
+          <Squircle as="a" href="#contact" className="button button--ghost">
+            Contact
           </Squircle>
         </div>
         <p className="note">
@@ -41,13 +41,13 @@ function Demo() {
               alt=""
             />
             <div className="card__body">
-              <b>Card mit Schatten</b>
+              <b>Card with a shadow</b>
               <span>Background, border, and shadow all come from CSS.</span>
             </div>
           </Squircle>
 
           <div className="stack">
-            <Squircle as="input" className="input" defaultValue="Eingabefeld" />
+            <Squircle as="input" className="input" defaultValue="Text input" />
             <Squircle as="span" className="badge">
               Badge
             </Squircle>

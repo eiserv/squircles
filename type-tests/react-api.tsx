@@ -18,11 +18,11 @@ const button = (
   </Squircle>
 );
 
-const image = <Squircle as="img" src="/a.jpg" alt="Ein Bild" radius={16} />;
+const image = <Squircle as="img" src="/a.jpg" alt="A picture" radius={16} />;
 
 const link = (
-  <Squircle as={CustomLink} href="/kontakt/" radius={8}>
-    Kontakt
+  <Squircle as={CustomLink} href="/contact/" radius={8}>
+    Contact
   </Squircle>
 );
 

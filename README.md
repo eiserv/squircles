@@ -71,7 +71,7 @@ import { Squircle } from "squircles/react";
 export function CallToAction() {
   return (
     <Squircle as="button" type="button" className="button">
-      Mehr erfahren
+      Learn more
     </Squircle>
   );
 }
@@ -107,8 +107,8 @@ Cards and images work the same way:
 
 ```tsx
 <Squircle as="article" className="card">
-  <Squircle as="img" className="card__image" src="/foto.jpg" alt="" />
-  <p>Ein Text</p>
+  <Squircle as="img" className="card__image" src="/photo.jpg" alt="" />
+  <p>Some text</p>
 </Squircle>
 ```
 
@@ -161,7 +161,7 @@ function ExistingButton() {
         stroke="var(--button-stroke)"
         strokeWidth={1}
       />
-      <span className="button__label">Mehr erfahren</span>
+      <span className="button__label">Learn more</span>
     </button>
   );
 }

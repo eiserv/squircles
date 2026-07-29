@@ -98,11 +98,21 @@ function readAuthoredStyles(host: HTMLElement): StyleReader {
   };
 }
 
-function createLayer(marker: string, zIndex: number): HTMLElement {
+/**
+ * Absolute offsets resolve against the padding box, but the geometry is
+ * measured on the border box. Pulling every layer out by the border width
+ * lines the two up again; without it a bordered element loses the outermost
+ * band of its shape and the corners read as square.
+ */
+function createLayer(
+  marker: string,
+  zIndex: number,
+  borderWidth: number,
+): HTMLElement {
   const layer = document.createElement("span");
   layer.setAttribute(marker, "");
   layer.setAttribute("aria-hidden", "true");
-  layer.style.cssText = `position:absolute;inset:0;z-index:${zIndex};pointer-events:none;`;
+  layer.style.cssText = `position:absolute;inset:${-borderWidth}px;z-index:${zIndex};pointer-events:none;`;
   return layer;
 }
 
@@ -155,7 +165,7 @@ export function syncLayers(
   host.style.setProperty("isolation", "isolate");
 
   for (const shadow of shadows) {
-    const layer = createLayer(SHADOW, -3);
+    const layer = createLayer(SHADOW, -3, border.width);
     layer.style.transform = `translate(${shadow.offsetX}px, ${shadow.offsetY}px)`;
     // CSS blur() takes a standard deviation; box-shadow's blur is twice that.
     layer.style.filter = `blur(${shadow.blur / 2}px)`;
@@ -180,7 +190,7 @@ export function syncLayers(
     host.style.setProperty("box-shadow", "none");
   }
 
-  const fill = createLayer(FILL, -2);
+  const fill = createLayer(FILL, -2, border.width);
   fill.style.backgroundColor = surface.backgroundColor;
   fill.style.backgroundImage = surface.backgroundImage;
   fill.style.backgroundSize = surface.backgroundSize;
@@ -200,8 +210,10 @@ export function syncLayers(
     stroke.setAttribute("focusable", "false");
     stroke.setAttribute("preserveAspectRatio", "none");
     stroke.setAttribute("viewBox", `0 0 ${size.width} ${size.height}`);
-    stroke.style.cssText =
-      "position:absolute;inset:0;z-index:-1;width:100%;height:100%;overflow:visible;pointer-events:none;display:block;";
+    // Same border box correction as createLayer, expressed as a size because
+    // an SVG with four offsets and no size falls back to its intrinsic one.
+    const outset = `calc(100% + ${border.width * 2}px)`;
+    stroke.style.cssText = `position:absolute;left:${-border.width}px;top:${-border.width}px;z-index:-1;width:${outset};height:${outset};overflow:visible;pointer-events:none;display:block;`;
 
     const path = document.createElementNS(SVG_NAMESPACE, "path");
     path.setAttribute("fill", "none");

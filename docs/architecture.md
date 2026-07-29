@@ -43,6 +43,12 @@ the host, each with `pointer-events: none`:
 | `[data-squircle-fill]` | -2 | The host's copied background longhands, clipped to the contour |
 | `[data-squircle-stroke]` | -1 | An SVG path carrying the border as a stroke |
 
+All three layers are offset outwards by the border width. The geometry is
+measured on the border box, but absolute offsets inside the host resolve against
+its padding box, so on a bordered element the two would disagree by the border
+width on every side — the outermost band of the contour would fall outside the
+layer and the corners would be cut off square.
+
 The host itself is deliberately **not** clipped. `clip-path` removes everything
 outside the contour, including shadows and including descendants, so clipping
 the host would make shadows impossible. Instead the host's background is copied

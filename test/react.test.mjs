@@ -9,23 +9,23 @@ test("renders the semantic host and nothing else", () => {
     createElement(
       Squircle,
       { as: "button", type: "button", radius: 8, className: "button" },
-      "Mehr erfahren",
+      "Learn more",
     ),
   );
 
   assert.equal(
     html,
-    '<button type="button" class="button">Mehr erfahren</button>',
+    '<button type="button" class="button">Learn more</button>',
   );
 });
 
 test("does not crash on a void element", () => {
   const html = renderToStaticMarkup(
-    createElement(Squircle, { as: "img", src: "/a.jpg", alt: "Ein Bild" }),
+    createElement(Squircle, { as: "img", src: "/a.jpg", alt: "A picture" }),
   );
 
   // React 19 also emits a preload link for images; only the tag itself matters.
-  assert.match(html, /<img src="\/a\.jpg" alt="Ein Bild"\/>/);
+  assert.match(html, /<img src="\/a\.jpg" alt="A picture"\/>/);
   assert.doesNotMatch(html, /<img[^>]*>[^<]/);
 });
 
