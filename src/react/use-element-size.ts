@@ -4,11 +4,9 @@ import {
   useState,
   type RefObject,
 } from "react";
+import type { ElementSize } from "../size.js";
 
-export type ElementSize = Readonly<{
-  width: number;
-  height: number;
-}>;
+export type { ElementSize };
 
 const useBrowserLayoutEffect =
   typeof window === "undefined" ? useEffect : useLayoutEffect;

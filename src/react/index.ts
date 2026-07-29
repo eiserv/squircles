@@ -8,6 +8,11 @@ export {
   type SquircleSurfaceProps,
 } from "./squircle-surface.js";
 export {
+  useSquircleClipPath,
+  type SquircleClipPathResult,
+  type UseSquircleClipPathOptions,
+} from "./use-squircle-clip-path.js";
+export {
   useSquirclePath,
   type SquirclePathResult,
   type UseSquirclePathOptions,

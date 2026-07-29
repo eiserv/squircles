@@ -17,6 +17,10 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./dom": {
+      "types": "./dist/dom/index.d.ts",
+      "import": "./dist/dom/index.js"
+    },
     "./react": {
       "types": "./dist/react/index.d.ts",
       "import": "./dist/react/index.js"
@@ -29,7 +33,8 @@
     "test": "npm run build && node --test",
     "check": "npm run typecheck && npm test && npm pack --dry-run --cache .npm-cache",
     "visual:fixture": "npm run build && node scripts/create-visual-fixture.mjs",
-    "playground": "npm run build && node scripts/serve-playground.mjs"
+    "build:examples": "node scripts/build-examples.mjs",
+    "playground": "npm run build && npm run build:examples && node scripts/serve-playground.mjs"
   },
   "keywords": [
     "figma",
@@ -54,6 +59,7 @@
     "@types/node": "^24.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "esbuild": "^0.25.12",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "typescript": "^6.0.0"

@@ -4,27 +4,40 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { Squircle, SquircleSurface } from "../dist/react/index.js";
 
-test("renders a semantic button with an SSR fallback", () => {
+test("renders the semantic host and nothing else", () => {
   const html = renderToStaticMarkup(
     createElement(
       Squircle,
-      {
-        as: "button",
-        type: "button",
-        radius: 8,
-        smoothing: 1,
-        fill: "#192d73",
-        stroke: "#e5e7eb",
-        strokeWidth: 1,
-      },
-      "Mehr erfahren",
+      { as: "button", type: "button", radius: 8, className: "button" },
+      "Learn more",
     ),
   );
 
-  assert.match(html, /^<button /);
-  assert.match(html, /background-color:#192d73/);
-  assert.match(html, /corner-shape:squircle/);
-  assert.match(html, />Mehr erfahren<\/button>$/);
+  assert.equal(
+    html,
+    '<button type="button" class="button">Learn more</button>',
+  );
+});
+
+test("does not crash on a void element", () => {
+  const html = renderToStaticMarkup(
+    createElement(Squircle, { as: "img", src: "/a.jpg", alt: "A picture" }),
+  );
+
+  // React 19 also emits a preload link for images; only the tag itself matters.
+  assert.match(html, /<img src="\/a\.jpg" alt="A picture"\/>/);
+  assert.doesNotMatch(html, /<img[^>]*>[^<]/);
+});
+
+test("passes the caller's style through untouched", () => {
+  const html = renderToStaticMarkup(
+    createElement(Squircle, {
+      as: "div",
+      style: { padding: 12 },
+    }),
+  );
+
+  assert.match(html, /style="padding:12px"/);
 });
 
 test("renders a deterministic fixed-size SVG surface on the server", () => {
