@@ -34,13 +34,11 @@ magnified corner are part of the page: they are the honest way to see the
 difference. Note the corner budget in the readout — at radius 24 on a 72px-tall
 button, Figma's constraint already reduces the effective smoothing.
 
-The difference grows with the radius. At a pill radius with `preserveSmoothing`,
-the smoothed ends are visibly flatter than the semicircular `border-radius`
-ends:
+The difference shrinks with the radius. At a pill radius with `preserveSmoothing`,
+the smoothed ends are almost identical to the semicircular `border-radius`
+ends. But theres a sweet-spot- where differences are visible really well:
 
-![The same playground at 360 × 120 with radius 60 and preserveSmoothing enabled:
-the squircle pill has noticeably flatter ends than the border-radius
-pill](docs/media/smoothing-extremes.png)
+![picture lol](docs/media/smoothing-extremes.png)
 
 ## Why this exists
 
