@@ -1,17 +1,23 @@
 {
   "name": "squircles",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Small, dependency-free Figma-style squircle geometry with optional React components.",
   "type": "module",
   "sideEffects": false,
   "files": [
     "dist",
-    "docs",
-    "examples",
     "LICENSE",
     "NOTICE",
     "README.md"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eiserv/squircles.git"
+  },
+  "homepage": "https://github.com/eiserv/squircles#readme",
+  "bugs": {
+    "url": "https://github.com/eiserv/squircles/issues"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -32,6 +38,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "npm run build && node --test",
     "check": "npm run typecheck && npm test && npm pack --dry-run --cache .npm-cache",
+    "prepublishOnly": "npm run typecheck && npm test",
     "visual:fixture": "npm run build && node scripts/create-visual-fixture.mjs",
     "build:examples": "node scripts/build-examples.mjs",
     "playground": "npm run build && npm run build:examples && node scripts/serve-playground.mjs"
