@@ -24,14 +24,6 @@ const SHADOW = "data-squircle-shadow";
 const SELECTOR = `[${FILL}], [${STROKE}], [${SHADOW}]`;
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 
-/** Paint the layers take over, lifted for the duration of a read. */
-const OVERRIDDEN = [
-  "background-color",
-  "background-image",
-  "border-color",
-  "box-shadow",
-] as const;
-
 /** Everything `syncLayers` needs from the element's own CSS. */
 const READ_PROPERTIES = [
   "border-top-left-radius",
@@ -50,6 +42,7 @@ const READ_PROPERTIES = [
   "background-repeat",
   "transition",
   "box-shadow",
+  "position",
 ] as const;
 
 const originalInline = new WeakMap<HTMLElement, string>();
@@ -62,25 +55,24 @@ function rememberInline(host: HTMLElement): void {
 
 /**
  * Reads the styles the author wrote rather than the ones this module applied,
- * by lifting the overrides for the duration of the read. Costs one style
- * recalculation, which is why the caller coalesces reads into a frame.
+ * by restoring the author's inline style for the duration of the read.
+ *
+ * Transitions stay off for the whole round trip. Otherwise lifting an
+ * override on a transitioned property starts a transition (and another one
+ * back on restore); its `transitionrun` schedules the next sync, which lifts
+ * the overrides again, and the element never settles.
  */
 function readAuthoredStyles(host: HTMLElement): StyleReader {
   const applied = host.style.cssText;
-
-  for (const property of OVERRIDDEN) {
-    host.style.removeProperty(property);
-  }
-
+  const authored = originalInline.get(host) ?? applied;
   const computed = getComputedStyle(host);
   const snapshot = new Map<string, string>();
 
-  // Read the authored transition before suppressing it below.
+  // This module never writes `transition` on the host, so the applied state
+  // already reports the authored value.
   snapshot.set("transition", computed.getPropertyValue("transition"));
 
-  // Lifting an override on a transitioned property makes the browser
-  // interpolate from the override, so a plain read would return the value in
-  // flight rather than the one the author asked for.
+  host.style.cssText = authored;
   host.style.setProperty("transition", "none");
 
   for (const property of READ_PROPERTIES) {
@@ -91,6 +83,11 @@ function readAuthoredStyles(host: HTMLElement): StyleReader {
     snapshot.set(property, computed.getPropertyValue(property));
   }
 
+  // Settle on the overrides while transitions are still off, so restoring the
+  // author's transition afterwards leaves nothing to animate.
+  host.style.cssText = applied;
+  host.style.setProperty("transition", "none");
+  computed.getPropertyValue("transition");
   host.style.cssText = applied;
 
   return {
@@ -158,7 +155,9 @@ export function syncLayers(
   clearLayers(host);
   rememberInline(host);
 
-  if (getComputedStyle(host).position === "static") {
+  // From the snapshot: a fresh read here would see the host without its
+  // overrides and start the very transitions readAuthoredStyles avoids.
+  if (styles.getPropertyValue("position") === "static") {
     host.style.setProperty("position", "relative");
   }
 
