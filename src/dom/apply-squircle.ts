@@ -10,14 +10,10 @@ function roundLayoutSize(value: number): number {
   return Math.round(value * 64) / 64;
 }
 
-const REREAD_EVENTS = [
-  "pointerenter",
-  "pointerleave",
-  "focusin",
-  "focusout",
-  "transitionrun",
-  "transitionend",
-] as const;
+const REREAD_EVENTS = ["pointerenter", "pointerleave", "focusin", "focusout"] as const;
+
+/** Only the host's own transitions; these bubble up from every descendant. */
+const TRANSITION_EVENTS = ["transitionrun", "transitionend"] as const;
 
 /**
  * Shapes an element from its own CSS and keeps it in sync. Returns a cleanup
@@ -39,6 +35,9 @@ export function applySquircle(
     }
 
     syncLayers(element, size, options);
+    // syncLayers writes the host's own inline style. Drop those records so
+    // the observer below does not schedule another sync every frame.
+    mutationObserver.takeRecords();
   };
 
   // Hover, focus, and class changes all land in the same frame.
@@ -93,8 +92,18 @@ export function applySquircle(
     attributeFilter: ["class", "style"],
   });
 
+  const scheduleOwnTransition = (event: Event): void => {
+    if (event.target === element) {
+      schedule();
+    }
+  };
+
   for (const type of REREAD_EVENTS) {
     element.addEventListener(type, schedule);
+  }
+
+  for (const type of TRANSITION_EVENTS) {
+    element.addEventListener(type, scheduleOwnTransition);
   }
 
   return () => {
@@ -109,6 +118,10 @@ export function applySquircle(
 
     for (const type of REREAD_EVENTS) {
       element.removeEventListener(type, schedule);
+    }
+
+    for (const type of TRANSITION_EVENTS) {
+      element.removeEventListener(type, scheduleOwnTransition);
     }
 
     clearLayers(element);

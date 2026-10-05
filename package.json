@@ -1,6 +1,6 @@
 {
   "name": "squircles",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Small, dependency-free Figma-style squircle geometry with optional React components.",
   "type": "module",
   "sideEffects": false,
