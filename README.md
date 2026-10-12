@@ -247,3 +247,10 @@ writes a static rasterization fixture to `.artifacts/`.
 
 See [docs/architecture.md](docs/architecture.md) for the rendering rationale
 and constraints.
+
+### Releasing
+
+Commits on `main` follow [Conventional Commits](https://www.conventionalcommits.org/).
+release-please keeps a release PR open that bumps the version and updates
+[CHANGELOG.md](CHANGELOG.md); merging it tags the release, creates the GitHub
+Release, and publishes to npm.
