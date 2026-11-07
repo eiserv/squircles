@@ -1,101 +1,95 @@
-# Architektur
+# Architecture
 
-## Paketgrenzen
+## Package boundaries
 
-- `squircles`: reine Geometrie ohne DOM-Zugriffe und Laufzeitabhängigkeiten.
-- `squircles/dom`: CSS-basierte Darstellung mit `applySquircle`.
-- `squircles/react`: Komponenten und Hooks, React als optionale Peer-Abhängigkeit.
-- `squircles/svelte`: Action mit Aktualisierung und Aufräumen, ohne Svelte-Import.
-- `src/css/`: strukturelle Leser für berechnete CSS-Werte, in Node testbar.
+- `squircles`: pure geometry with no DOM access or runtime dependencies.
+- `squircles/dom`: CSS-driven rendering through `applySquircle`.
+- `squircles/react`: components and hooks, with React as an optional peer.
+- `squircles/svelte`: an action with updates and cleanup, without a Svelte import.
+- `src/css/`: structural readers for computed CSS values, testable in Node.
 
-Die englischen Namen der veröffentlichten API und der CSS-Eigenschaften bleiben
-zur Kompatibilität bestehen. Kommentare, Beispiele und Fehlermeldungen sind deutsch.
+The public API, documentation, comments, examples, and error messages use English.
 
-## Geometrie und Kontur
+## Geometry and borders
 
-Die Geometrie folgt Figmas veröffentlichter kubischer Bézier-Konstruktion:
-`smoothing: 0` ergibt Kreisbögen, `1` vollständig geglättete Übergänge.
-Jede Ecke erhält einen proportionalen Anteil der benachbarten Seiten.
-Reicht der Platz nicht aus, wird die Glättung begrenzt. `preserveSmoothing`
-komprimiert stattdessen die ersten Kontrollpunkte.
+The geometry follows Figma's published cubic Bézier construction:
+`smoothing: 0` uses circular arcs; `1` uses fully smoothed transitions.
+Each corner receives a proportional share of its adjacent sides. When space is
+limited, smoothing is constrained. `preserveSmoothing` instead compresses the
+first control points.
 
-Eine Kontur entsteht als SVG-Stroke auf dem um eine halbe Konturbreite
-versetzten Pfad. Eine separat berechnete innere Maske entfällt: Das bloße
-Verkleinern eines Eckradius ergäbe keinen exakten parallelen Bézier-Versatz.
-Quellen und Danksagungen stehen in `NOTICE`.
+Borders use an SVG stroke on a path inset by half the stroke width. There is no
+separate inner mask: simply shrinking a corner radius would not produce an exact
+parallel offset of a Bézier curve. Sources and acknowledgments are in `NOTICE`.
 
-## Darstellungsebenen
+## Rendering layers
 
-`Squircle` rendert nur sein natives Element. Ein Effekt bindet `applySquircle`
-an dieses Element. Die Darstellungsebenen liegen außerhalb von Reacts Abgleich.
-Ein Wechsel von `as` entfernt die alte Anbindung und misst das neue Element.
+`Squircle` renders only its native element. An effect binds `applySquircle` to
+that element, keeping rendering layers outside React reconciliation. Changing
+`as` removes the previous binding and measures the new element.
 
-| Ebene | Stapelposition | Aufgabe |
+| Layer | Stacking order | Purpose |
 | --- | --- | --- |
-| `[data-squircle-shadow]` | -3 | Versetzte, weichgezeichnete Form pro äußerem Schatten |
-| `[data-squircle-fill]` | -2 | Kopierter Hintergrund mit geglättetem Clip-Pfad |
-| `[data-squircle-stroke]` | -1 | SVG-Kontur auf dem geglätteten Pfad |
+| `[data-squircle-shadow]` | -3 | An offset, blurred shape for each outer shadow |
+| `[data-squircle-fill]` | -2 | A copied background clipped to the smoothed shape |
+| `[data-squircle-stroke]` | -1 | An SVG stroke on the smoothed path |
 
-Alle Ebenen ignorieren Zeigereingaben. Ihr negativer Versatz um die Konturbreite
-gleicht den Unterschied zwischen Innen- und Rahmenfläche aus. Die originale
-Kontur wird transparent, behält aber ihre Breite, damit sich das Layout nicht
-verschiebt. Das Element selbst bleibt standardmäßig unbeschnitten, sodass
-Schatten und Fokusmarkierungen sichtbar bleiben.
+All layers ignore pointer events. Their negative offset by the border width
+compensates for the difference between padding and border boxes. The original
+border becomes transparent but retains its width to prevent layout shifts.
+The host is not clipped by default, keeping shadows and focus outlines visible.
 
-Die SVG-Kontur überdeckt den Rand der Hintergrundfläche. Bei halbtransparenten
-Konturen kann dieser durchscheinen; `SquircleSurface` zeichnet Füllung und Kontur
-gemeinsam auf einem SVG-Pfad und vermeidet diesen Fall.
+The SVG stroke covers the clipped background edge. Semi-transparent borders may
+expose that edge; `SquircleSurface` avoids this by drawing fill and stroke
+together on one SVG path.
 
-## CSS lesen und wiederherstellen
+## Reading and restoring CSS
 
-Zum Lesen werden eigene Überschreibungen kurz aufgehoben. Übergänge bleiben
-währenddessen deaktiviert, damit das Lesen keine Übergänge oder dauernde
-Neuberechnungen auslöst. Änderungen werden pro Animationsframe gebündelt;
-eigene Mutationseinträge werden anschließend verworfen.
+Our overrides are temporarily lifted to read authored styles. Transitions stay
+disabled during the read to prevent new transitions or endless updates.
+Updates are coalesced per animation frame; our own mutation records are discarded
+afterward.
 
-Pro Element werden die ursprünglichen und die zuletzt angewendeten Inline-Stile
-gespeichert. Abweichungen gegenüber dem angewendeten Zustand werden in die
-ursprünglichen Stile übernommen. Dadurch bleiben nachträgliche Änderungen durch
-Frameworks beim Neuzeichnen und Aufräumen erhalten. Eine Zuweisung genau des
-bereits von der Bibliothek gesetzten Werts ist davon nicht unterscheidbar.
+Each element stores its authored and most recently applied inline styles.
+Differences from the applied state are merged into the authored state, preserving
+later framework changes across redraws and cleanup. Assigning exactly the same
+value already applied by the library cannot be distinguished from our override.
 
-Eine Anbindung pro Element ist vorgesehen. Aufräumen ist idempotent und entfernt
-Beobachter, Ereignisbehandlung, ausstehende Frames und eigene Ebenen.
+Only one binding per element is supported. Cleanup is idempotent and removes
+observers, event handlers, pending frames, and our own layers.
 
-## Größenmessung
+## Size measurement
 
-DOM und React verwenden dieselbe Messung. `ResizeObserver` liefert logische
-Inline- und Blockmaße, die anhand von `writing-mode` in physische Breite und Höhe
-umgerechnet werden. Das umfasst `vertical-*` und `sideways-*`.
-Auf 1/64 Pixel gerundete Maße vermeiden Änderungen durch minimale Messabweichungen.
+DOM and React share the same measurement code. `ResizeObserver` provides logical
+inline and block dimensions, which are mapped to physical width and height using
+`writing-mode`, including `vertical-*` and `sideways-*`. Sizes are rounded to
+1/64 pixel to avoid updates caused by tiny measurement differences.
 
-Fehlt `ResizeObserver`, werden die Abmessungen beim Start und bei
-Fenstergrößenänderungen gemessen. Sonstige Layoutänderungen benötigen dann einen
-Polyfill. Feste Größen umgehen die Messung in den React-Hooks vollständig.
-Flächen mit Breite oder Höhe null ergeben keinen gültigen sichtbaren Pfad.
+Without `ResizeObserver`, dimensions are measured on startup and window resize.
+Other layout changes require a polyfill. Fixed sizes bypass measurement in the
+React hooks. Boxes with zero width or height have no visible valid path.
 
-## Grenzen
+## Limits
 
-- `outline` und innere Schatten folgen weiterhin der normalen CSS-Rundung.
-- Nur durchgezogene Konturen anhand der oberen Rahmenwerte werden gezeichnet.
-- Elliptische Radien werden auf den einbeschriebenen Kreis reduziert.
-- Leere HTML-Elemente wie `img` und `input` erhalten direkt einen Clip-Pfad.
-  Dieser beschneidet auch ihre eigene Kontur und ihren Schatten.
-- `backdrop-filter` bleibt ohne `clipContent` rechteckig.
-- Schattenlisten werden als einzelne Ebenen zusammengesetzt. Innere Schatten
-  werden nicht nachgezeichnet; in gemischten Listen verschwinden sie beim
-  Unterdrücken des ursprünglichen Schattens.
-- Änderungen ausschließlich an Vorfahren oder Stylesheets benötigen ein
-  beobachtetes Ereignis am Element, etwa eine Größen- oder Klassenänderung.
-- Hintergrundübergänge werden weitergereicht; Geometrie- und Konturänderungen
-  werden zum Zeitpunkt der Aktualisierung neu gezeichnet.
-- Bruchteile physischer Pixel können weiterhin leicht unterschiedliche
-  Rasterisierung an gegenüberliegenden Kanten ergeben.
+- `outline` and inset shadows still follow ordinary CSS rounding.
+- Only solid borders based on the top border values are drawn.
+- Elliptical radii are reduced to the inscribed circle.
+- Void HTML elements such as `img` and `input` receive a clip path directly,
+  which also clips their own border and shadow.
+- `backdrop-filter` remains rectangular unless `clipContent` is enabled.
+- Shadow lists are composited as individual layers. Inset shadows are not
+  redrawn; in mixed lists, they disappear when the original shadow is suppressed.
+- Changes exclusively to ancestors or stylesheets need an observed event on the
+  element, such as a size or class change.
+- Background transitions are forwarded; geometry and border changes are redrawn
+  at update time.
+- Fractional physical pixels can still produce slightly different rasterization
+  on opposite edges.
 
-## Prüfung und Bilder
+## Verification and images
 
-`npm run check` prüft Typen, Geometrie, CSS-Leser, serverseitiges React-Rendering
-und den Paketinhalt. `npm run test:browser` prüft die DOM-Lebenszyklen,
-Stiländerungen, Schreibrichtungen und den Playground in Chromium.
-`npm run screenshots` fotografiert den Playground und rendert den Schatten in
-einen transparenten PNG-Rand. Die Bildbreiten im README sind explizit begrenzt.
+`npm run check` verifies types, geometry, CSS readers, server-side React rendering,
+and package contents. `npm run test:browser` checks DOM lifecycles, style changes,
+writing modes, and the playground in Chromium. `npm run screenshots` captures the
+playground and renders its shadow into a transparent PNG margin. Image widths in
+the README are explicitly limited.

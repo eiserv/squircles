@@ -23,12 +23,9 @@ const pages = {
   "/svelte/": "examples/svelte/index.html",
 };
 
-/**
- * Löst einen Anfragepfad innerhalb des Pakets auf; außerhalb liegende Pfade werden
- * verworfen.
- */
+/** Resolves a request path inside the package and rejects paths outside it. */
 function resolve(requestPath) {
-  // Die Framework-Seiten und ihre Dateien teilen sich jeweils einen Unterpfad.
+  // Each framework page shares a subpath with its assets.
   const relative =
     pages[requestPath] ??
     (/^\/(react|svelte)\//.test(requestPath)
@@ -43,7 +40,7 @@ const server = createServer(async (request, response) => {
   const target = resolve(new URL(request.url, "http://localhost").pathname);
 
   if (!target) {
-    response.writeHead(403).end("Zugriff verweigert");
+    response.writeHead(403).end("Forbidden");
     return;
   }
 
@@ -53,10 +50,10 @@ const server = createServer(async (request, response) => {
     const stats = await stat(path);
 
     if (!stats.isFile()) {
-      throw new Error("Keine Datei");
+      throw new Error("Not a file");
     }
   } catch {
-    response.writeHead(404).end("Nicht gefunden");
+    response.writeHead(404).end("Not found");
     return;
   }
 
@@ -68,7 +65,7 @@ const server = createServer(async (request, response) => {
 });
 
 server.listen(port, () => {
-  console.log(`squircles Spielwiese: http://localhost:${port}/`);
-  console.log(`squircles mit React:   http://localhost:${port}/react/`);
-  console.log(`squircles mit Svelte:  http://localhost:${port}/svelte/`);
+  console.log(`squircles Playground: http://localhost:${port}/`);
+  console.log(`squircles with React:   http://localhost:${port}/react/`);
+  console.log(`squircles with Svelte:  http://localhost:${port}/svelte/`);
 });

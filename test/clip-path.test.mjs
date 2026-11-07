@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createSquircleClipPath } from "../dist/index.js";
 
-test("verpackt den Pfad als CSS-Wert", () => {
+test("wraps a path in a CSS path() value", () => {
   const value = createSquircleClipPath({
     width: 120,
     height: 48,
@@ -14,12 +14,12 @@ test("verpackt den Pfad als CSS-Wert", () => {
   assert.ok(value.endsWith(" Z')"), value);
 });
 
-test("liefert bei leeren Flächen den gültigen CSS-Wert none", () => {
+test("returns none for a degenerate box so the CSS value stays valid", () => {
   assert.equal(createSquircleClipPath({ width: 0, height: 48 }), "none");
   assert.equal(createSquircleClipPath({ width: 120, height: 0 }), "none");
 });
 
-test("reicht Optionen an die Geometrie weiter", () => {
+test("passes options through to the geometry", () => {
   const inset = createSquircleClipPath({
     width: 120,
     height: 48,

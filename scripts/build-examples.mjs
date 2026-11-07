@@ -21,7 +21,7 @@ await build({
   target: "es2022",
   logLevel: "info",
   plugins: [{
-    name: "svelte-beispiele",
+    name: "svelte-examples",
     setup(build) {
       build.onLoad({ filter: /\.svelte$/ }, async ({ path }) => {
         const source = await readFile(path, "utf8");

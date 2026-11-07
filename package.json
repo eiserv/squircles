@@ -1,7 +1,7 @@
 {
   "name": "squircles",
   "version": "0.2.1",
-  "description": "Eckenglättung nach Figma ohne Laufzeitabhängigkeiten, mit DOM-, React- und Svelte-Anbindung.",
+  "description": "Dependency-free Figma-style corner smoothing with DOM, React, and Svelte integrations.",
   "type": "module",
   "sideEffects": false,
   "files": [

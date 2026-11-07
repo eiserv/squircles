@@ -3,7 +3,7 @@ import type { SquircleGeometryOptions } from "../dom/layers.js";
 
 export type { SquircleGeometryOptions };
 
-/** Svelte-Action mit CSS-Vorgaben, reaktiven Optionen und automatischem Aufräumen. */
+/** Svelte action with CSS defaults, reactive options, and automatic cleanup. */
 export function squircle(
   element: HTMLElement,
   options: SquircleGeometryOptions = {},

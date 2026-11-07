@@ -4,7 +4,7 @@ function round(value: number): number {
   return Math.round(value * 64) / 64;
 }
 
-/** Liest physische Maße, auch bei vertikaler oder seitlicher Schreibrichtung. */
+/** Reads physical dimensions, including vertical and sideways writing modes. */
 export function readBorderBox(entry: ResizeObserverEntry): ElementSize | null {
   const sizes = entry.borderBoxSize as
     | ResizeObserverSize
@@ -20,7 +20,10 @@ export function readBorderBox(entry: ResizeObserverEntry): ElementSize | null {
   };
 }
 
-/** Gemeinsame Größenmessung für DOM und React; ohne Observer bei Fensteränderungen. */
+/**
+ * Shared DOM and React measurement, with window resize updates when no observer is
+ * available.
+ */
 export function observeElementSize(
   element: Element,
   update: (size: ElementSize) => void,

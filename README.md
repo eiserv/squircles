@@ -1,23 +1,29 @@
 # squircles
 
-Eckenglättung nach Figma für das Web. Hintergrund, Kontur, Schatten und Hover
-bleiben in deinem CSS. Ohne zusätzliche Hülle, mit optionaler React- und
-Svelte-Anbindung und ohne Laufzeitabhängigkeiten im Geometrie- und DOM-Paket.
+[![npm version](https://img.shields.io/npm/v/squircles?style=flat-square&color=242424)](https://www.npmjs.com/package/squircles)
+[![CI](https://img.shields.io/github/actions/workflow/status/eiserv/squircles/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/eiserv/squircles/actions/workflows/ci.yml)
+[![npm downloads](https://img.shields.io/npm/dm/squircles?style=flat-square&color=666666)](https://www.npmjs.com/package/squircles)
+[![TypeScript types included](https://img.shields.io/badge/TypeScript-types_included-3178c6?style=flat-square&logo=typescript&logoColor=white)](https://github.com/eiserv/squircles/blob/main/src/index.ts)
+[![MIT license](https://img.shields.io/github/license/eiserv/squircles?style=flat-square&color=666666)](LICENSE)
+
+Figma-style corner smoothing for the web. Backgrounds, borders, shadows, and hover
+states stay in your CSS. No extra wrapper, optional React and Svelte integrations,
+and no runtime dependencies in the geometry or DOM packages.
 
 <p align="center">
-  <img src="docs/media/playground.png" width="640" alt="Die neutrale Spielwiese mit Reglern, Formvergleich und vergrößerter Ecke" />
+  <img src="docs/media/playground.png" width="640" alt="The neutral playground with controls, shape comparison, and an enlarged corner" />
 </p>
 
-## Installation
+## Install
 
 ```sh
 npm install squircles
 ```
 
-## Ein CSS, mehrere Wege
+## One stylesheet, several ways to use it
 
 ```css
-.taste {
+.button {
   background: #242424;
   color: white;
   border: 1px solid #666;
@@ -27,74 +33,74 @@ npm install squircles
 }
 ```
 
-**React** (ab Version 18):
+**React** (18 or later):
 
 ```tsx
 import { Squircle } from "squircles/react";
 
-<Squircle as="button" type="button" className="taste">
-  Mehr erfahren
+<Squircle as="button" type="button" className="button">
+  Learn more
 </Squircle>
 ```
 
-**Svelte** als [Action](https://svelte.dev/docs/svelte/use):
+**Svelte** as an [action](https://svelte.dev/docs/svelte/use):
 
 ```svelte
 <script>
   import { squircle } from "squircles/svelte";
 </script>
 
-<button class="taste" use:squircle>Mehr erfahren</button>
+<button class="button" use:squircle>Learn more</button>
 ```
 
-**JavaScript, Vue oder andere Frameworks** über den DOM-Einstieg:
+**JavaScript, Vue, or other frameworks** through the DOM entry point:
 
 ```ts
 import { applySquircle } from "squircles/dom";
 
-const element = document.querySelector<HTMLElement>(".taste");
-const aufraeumen = element ? applySquircle(element) : () => {};
-// Beim Entfernen des Elements aufrufen.
-aufraeumen();
+const element = document.querySelector<HTMLElement>(".button");
+const cleanup = element ? applySquircle(element) : () => {};
+// Call when the element is removed.
+cleanup();
 ```
 
-Die Anbindungen lesen `border-radius` und `--squircle-smoothing` aus dem CSS.
-Klassen-, Stil- und Größenänderungen sowie Hover und Fokus aktualisieren die Form.
-Beim serverseitigen Rendern bleibt zunächst der normale CSS-Radius sichtbar.
+The integrations read `border-radius` and `--squircle-smoothing` from CSS.
+Class, style, and size changes, along with hover and focus, update the shape.
+Server-rendered elements initially use their ordinary CSS radius.
 
-## Nur die Geometrie
+## Geometry only
 
 ```ts
 import { createSquirclePath, createSquircleClipPath } from "squircles";
 
-const optionen = { width: 200, height: 96, radius: 24, smoothing: 1 };
-const pfad = createSquirclePath(optionen);
-const clipPath = createSquircleClipPath(optionen);
+const options = { width: 200, height: 96, radius: 24, smoothing: 1 };
+const path = createSquirclePath(options);
+const clipPath = createSquircleClipPath(options);
 ```
 
-`radius` unterstützt einzelne Ecken; `smoothing` reicht von `0` bis `1`.
-Bei wenig Platz wird die Glättung wie in Figma begrenzt.
-`preserveSmoothing: true` erhält sie durch komprimierte Kontrollpunkte.
-`inset` versetzt den Pfad nach innen, etwa um eine halbe SVG-Konturbreite.
+`radius` supports individual corners; `smoothing` ranges from `0` to `1`.
+When space is limited, smoothing is constrained as in Figma.
+`preserveSmoothing: true` keeps it by compressing the control points.
+`inset` moves the path inward, for example by half an SVG stroke width.
 
 <p align="center">
-  <img src="docs/media/smoothing-extremes.png" width="440" alt="Durchgezogene Squircle-Kontur und gestrichelter border-radius mit vergrößerter Ecke" />
+  <img src="docs/media/smoothing-extremes.png" width="440" alt="Solid squircle and dashed border-radius outlines with an enlarged corner" />
 </p>
 
-## Grenzen und weitere Beispiele
+## Limits and more examples
 
-- Durchgezogene, einheitliche Konturen; keine unterschiedlichen Ränder pro Seite.
-- Fokusmarkierungen und innere Schatten folgen weiterhin `border-radius`.
-- Bilder und Eingaben erhalten einen Clip-Pfad, der auch ihre Kontur und ihren
-  Schatten beschneidet. Bei Bedarf ein umgebendes Element verwenden.
-- Für halbtransparente Konturen gibt es `SquircleSurface` unter `squircles/react`.
-- Ohne `ResizeObserver` wird beim Start und bei Fenstergrößenänderungen gemessen.
-  Für sonstige Layoutänderungen ist ein Polyfill nötig.
+- Borders must be solid and uniform; different borders per side are not supported.
+- Focus outlines and inset shadows still follow `border-radius`.
+- Images and inputs receive a clip path that also clips their border and shadow.
+  Use a wrapper when needed.
+- For semi-transparent borders, use `SquircleSurface` from `squircles/react`.
+- Without `ResizeObserver`, measurement runs on startup and window resize.
+  Other layout changes require a polyfill.
 
-[Integration, Optionen und Migration](docs/integration.md) ·
-[Architektur und Grenzen](docs/architecture.md)
+[Integration, options, and migration](docs/integration.md) ·
+[Architecture and limits](docs/architecture.md)
 
-## Entwicklung
+## Development
 
 ```sh
 npm ci
@@ -104,11 +110,11 @@ npm run test:browser
 npm run playground
 ```
 
-Spielwiese: [localhost:5173](http://localhost:5173/), React:
-[localhost:5173/react](http://localhost:5173/react/).
-Svelte-Beispiele: [localhost:5173/svelte](http://localhost:5173/svelte/).
-`npm run screenshots` erstellt die README-Bilder mit transparentem Schatten neu.
-`npm run visual:fixture` erzeugt weitere Geometriebeispiele in `.artifacts/`.
+Playground: [localhost:5173](http://localhost:5173/), React:
+[localhost:5173/react](http://localhost:5173/react/), Svelte:
+[localhost:5173/svelte](http://localhost:5173/svelte/).
+`npm run screenshots` regenerates the README images with transparent shadows.
+`npm run visual:fixture` creates more geometry examples in `.artifacts/`.
 
-Commits auf `main` verwenden [Conventional Commits](https://www.conventionalcommits.org/).
-release-please erstellt die Versions-PR; ihr Merge veröffentlicht das npm-Paket.
+Commits on `main` follow [Conventional Commits](https://www.conventionalcommits.org/).
+release-please opens a release PR; merging it publishes the npm package.

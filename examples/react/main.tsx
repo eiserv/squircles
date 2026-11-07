@@ -2,54 +2,54 @@ import { StrictMode, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { Squircle } from "../../src/react/index.js";
 
-function Beispiele() {
-  const [alsLink, setzeAlsLink] = useState(false);
+function Examples() {
+  const [asLink, setAsLink] = useState(false);
   return (
     <main>
       <header>
         <div>
-          <h1>squircles mit React</h1>
-          <p>Native Elemente mit geglätteten Ecken. Die Gestaltung bleibt im CSS.</p>
+          <h1>squircles with React</h1>
+          <p>Native elements with smoother corners. Styling stays in CSS.</p>
         </div>
-        <nav aria-label="Beispiele"><a href="/">Zur Spielwiese</a><a href="/svelte/">Svelte</a></nav>
+        <nav aria-label="Examples"><a href="/">Back to playground</a><a href="/svelte/">Svelte</a></nav>
       </header>
 
-      <section className="beispiele" aria-labelledby="schaltflaechen">
-        <h2 id="schaltflaechen">Schaltflächen und Links</h2>
-        <div className="reihe">
-          <Squircle as="button" type="button" className="taste">Mehr erfahren</Squircle>
-          <Squircle as="a" href="#elementwechsel" className="taste taste--hell">Zu den Beispielen</Squircle>
+      <section className="examples" aria-labelledby="buttons">
+        <h2 id="buttons">Buttons and links</h2>
+        <div className="row">
+          <Squircle as="button" type="button" className="button">Learn more</Squircle>
+          <Squircle as="a" href="#host-change" className="button button--light">See the examples</Squircle>
         </div>
-        <p className="hinweis">Hover, Fokusmarkierung und Hintergrund werden wie gewohnt per CSS gestaltet.</p>
+        <p className="note">Style hover, focus outlines, and backgrounds in ordinary CSS.</p>
       </section>
 
-      <section className="beispiele" aria-labelledby="weitere-elemente">
-        <h2 id="weitere-elemente">Karte, Bild und Eingabe</h2>
-        <div className="reihe">
-          <Squircle as="article" className="karte">
-            <Squircle as="img" className="kartenbild" src="/examples/formen.svg" alt="Zwei geglättete Formen in Grautönen" />
-            <div className="kartentext"><b>Eine Karte, weichere Ecken.</b><span>Hintergrund, Kontur und Schatten bleiben im CSS.</span></div>
+      <section className="examples" aria-labelledby="more-elements">
+        <h2 id="more-elements">Card, image, and input</h2>
+        <div className="row">
+          <Squircle as="article" className="card">
+            <Squircle as="img" className="card-image" src="/examples/shapes.svg" alt="Two smoothed shapes in grayscale" />
+            <div className="card-body"><b>A card with smoother corners.</b><span>Background, border, and shadow stay in CSS.</span></div>
           </Squircle>
-          <div className="stapel">
-            <label className="feld"><span>Texteingabe</span><Squircle as="input" className="eingabe" defaultValue="Dein Text" /></label>
-            <Squircle as="span" className="markierung">Ohne zusätzliche Hülle</Squircle>
+          <div className="stack">
+            <label className="field"><span>Text input</span><Squircle as="input" className="input" defaultValue="Your text" /></label>
+            <Squircle as="span" className="badge">No extra wrapper</Squircle>
           </div>
         </div>
       </section>
 
-      <section className="beispiele" id="elementwechsel" aria-labelledby="wechsel">
-        <h2 id="wechsel">Das Element wechseln</h2>
-        <div className="reihe">
-          <button className="taste taste--hell" type="button" onClick={() => setzeAlsLink(!alsLink)}>Element wechseln</button>
-          {alsLink
-            ? <Squircle as="a" href="#wechsel" className="taste" data-wechsel>Jetzt ein Link</Squircle>
-            : <Squircle as="button" type="button" className="taste" data-wechsel>Jetzt eine Schaltfläche</Squircle>}
+      <section className="examples" id="host-change" aria-labelledby="switch">
+        <h2 id="switch">Switch the element</h2>
+        <div className="row">
+          <button className="button button--light" type="button" onClick={() => setAsLink(!asLink)}>Switch element</button>
+          {asLink
+            ? <Squircle as="a" href="#switch" className="button" data-switch>Now a link</Squircle>
+            : <Squircle as="button" type="button" className="button" data-switch>Now a button</Squircle>}
         </div>
-        <p className="hinweis">Die Form folgt dem neuen Element; alte Beobachter werden entfernt.</p>
+        <p className="note">The shape follows the new element; old observers are removed.</p>
       </section>
     </main>
   );
 }
 
 const container = document.getElementById("root");
-if (container) createRoot(container).render(<StrictMode><Beispiele /></StrictMode>);
+if (container) createRoot(container).render(<StrictMode><Examples /></StrictMode>);

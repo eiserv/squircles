@@ -2,7 +2,7 @@ import type { SquircleShadow } from "./types.js";
 
 const LENGTH = /^-?(?:\d*\.)?\d+(?:e[+-]?\d+)?px$/i;
 
-/** Trennt nur außerhalb von Funktionen, auch bei beliebig tiefer Verschachtelung. */
+/** Splits only outside functions, including arbitrarily nested functions. */
 function splitOutsideFunctions(value: string, separator: RegExp): string[] {
   const parts: string[] = [];
   let depth = 0;
@@ -27,7 +27,7 @@ function splitOutsideFunctions(value: string, separator: RegExp): string[] {
   return parts.map((part) => part.trim()).filter(Boolean);
 }
 
-/** Behält auch moderne Farbfunktionen wie oklch() und color() unverändert bei. */
+/** Preserves modern color functions such as oklch() and color(). */
 function parseShadow(part: string): SquircleShadow | null {
   const text = part.trim();
 

@@ -12,18 +12,21 @@ export type SquirclePathOptions = Readonly<{
   height: number;
   radius?: SquircleRadius;
   /**
-   * Eckenglättung nach Figma von 0 bis 1: 0 ergibt Kreisbögen, 1 vollständig geglättete
-   * Übergänge.
+   * Figma corner smoothing from 0 to 1: 0 uses circular arcs; 1 uses fully smoothed
+   * transitions.
    */
   smoothing?: number;
-  /** Erhält die Glättung bei wenig Platz. Standardmäßig wird sie wie in Figma begrenzt. */
+  /**
+   * Preserves smoothing when a corner runs out of room. By default, smoothing is
+   * constrained as in Figma.
+   */
   preserveSmoothing?: boolean;
   /**
-   * Versetzt den Pfad nach innen und verkleinert die Radien entsprechend. Eine halbe
-   * Konturbreite hält die SVG-Kontur innerhalb der Fläche.
+   * Insets the path and reduces the radii by the same amount. Half a stroke width
+   * keeps the SVG stroke inside the box.
    */
   inset?: number;
-  /** Anzahl der Nachkommastellen im erzeugten SVG-Pfad. */
+  /** Decimal places used in the generated SVG path. */
   precision?: number;
 }>;
 
@@ -48,7 +51,7 @@ const DEFAULT_RADII: SquircleCornerRadii = {
 
 function assertFinite(name: string, value: number): void {
   if (!Number.isFinite(value)) {
-    throw new TypeError(`${name} muss eine endliche Zahl sein`);
+    throw new TypeError(`${name} must be a finite number`);
   }
 }
 
@@ -104,8 +107,8 @@ function insetRadii(
 }
 
 /**
- * Verteilt den Platz beider Nachbarseiten deterministisch und symmetrisch. Benachbarte
- * Ecken überlappen dadurch nie.
+ * Allocates each corner a deterministic, symmetric share of its adjacent sides,
+ * preventing neighboring corners from overlapping.
  */
 function getCornerBudgets(
   width: number,
@@ -275,9 +278,8 @@ function topLeft(curve: CornerCurve, number: (value: number) => string) {
 }
 
 /**
- * Erzeugt einen kompakten SVG-Pfad mit Eckenglättung nach Figmas Bézier-Konstruktion.
- * Eingaben werden geprüft, Radien pro Ecke unterstützt und Konturen bei Bedarf nach
- * innen versetzt.
+ * Creates a compact SVG path using Figma's cubic Bézier construction, with input
+ * validation, per-corner radii, and optional stroke insetting.
  */
 export function createSquirclePath({
   width,
@@ -295,7 +297,7 @@ export function createSquirclePath({
   assertFinite("precision", precision);
 
   if (width < 0 || height < 0) {
-    throw new RangeError("width und height dürfen nicht negativ sein");
+    throw new RangeError("width and height must be zero or greater");
   }
 
   if (width === 0 || height === 0) {

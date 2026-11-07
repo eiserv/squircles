@@ -2,14 +2,14 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createSquirclePath, resolveSquircleRadii } from "../dist/index.js";
 
-test("erzeugt bei Radius null ein Rechteck", () => {
+test("creates a plain rectangle when the radius is zero", () => {
   assert.equal(
     createSquirclePath({ width: 100, height: 48 }),
     "M 100 0 L 100 48 L 0 48 L 0 0 Z",
   );
 });
 
-test("erzeugt einen stabilen vollständig geglätteten Pfad", () => {
+test("creates a stable fully smoothed button path", () => {
   assert.equal(
     createSquirclePath({
       width: 120,
@@ -21,7 +21,7 @@ test("erzeugt einen stabilen vollständig geglätteten Pfad", () => {
   );
 });
 
-test("hält eine 1-Pixel-Kontur innerhalb der Fläche", () => {
+test("keeps a one-pixel SVG stroke fully inside the box", () => {
   const path = createSquirclePath({
     width: 120,
     height: 48,
@@ -36,7 +36,7 @@ test("hält eine 1-Pixel-Kontur innerhalb der Fläche", () => {
   assert.match(path, / L 0\.5 15\.5 /);
 });
 
-test("normalisiert einzelne Ecken ohne Überlappung", () => {
+test("normalizes individual corners without overlap", () => {
   const path = createSquirclePath({
     width: 60,
     height: 40,
@@ -54,7 +54,7 @@ test("normalisiert einzelne Ecken ohne Überlappung", () => {
   assert.ok(!path.includes("Infinity"));
 });
 
-test("begrenzt die Glättung und negative Radien", () => {
+test("clamps smoothing and negative radii", () => {
   assert.equal(
     createSquirclePath({
       width: 100,
@@ -66,22 +66,22 @@ test("begrenzt die Glättung und negative Radien", () => {
   );
 });
 
-test("liefert einen leeren Pfad für eine leere Fläche", () => {
+test("returns an empty path for a zero-sized box", () => {
   assert.equal(createSquirclePath({ width: 0, height: 48, radius: 8 }), "");
 });
 
-test("weist ungültige Zahlen zurück", () => {
+test("rejects invalid numeric input", () => {
   assert.throws(
     () => createSquirclePath({ width: Number.NaN, height: 48 }),
-    /width muss eine endliche Zahl sein/,
+    /width must be a finite number/,
   );
   assert.throws(
     () => createSquirclePath({ width: -1, height: 48 }),
-    /nicht negativ/,
+    /zero or greater/,
   );
 });
 
-test("löst einheitliche und individuelle Radien auf", () => {
+test("resolves shorthand and per-corner radii", () => {
   assert.deepEqual(resolveSquircleRadii(8), {
     topLeft: 8,
     topRight: 8,
@@ -96,7 +96,7 @@ test("löst einheitliche und individuelle Radien auf", () => {
   });
 });
 
-test("bleibt bei wechselnden Maßen und begrenztem Eckraum endlich", () => {
+test("stays finite across responsive sizes and corner budgets", () => {
   for (let index = 1; index <= 500; index += 1) {
     const width = 24 + ((index * 37) % 320) + (index % 3) / 3;
     const height = 20 + ((index * 19) % 140) + (index % 5) / 5;

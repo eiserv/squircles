@@ -1,6 +1,6 @@
 /**
- * Minimaler struktureller Ausschnitt aus CSSStyleDeclaration, damit die Leser ohne DOM
- * in Node testbar bleiben.
+ * The structural subset of CSSStyleDeclaration needed by the readers, keeping them
+ * testable in Node without a DOM.
  */
 export type StyleReader = Readonly<{
   getPropertyValue(property: string): string;

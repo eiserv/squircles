@@ -1,4 +1,4 @@
 import { mount } from "svelte";
-import Beispiele from "./Beispiele.svelte";
+import Examples from "./Examples.svelte";
 
-mount(Beispiele, { target: document.getElementById("root") });
+mount(Examples, { target: document.getElementById("root") });

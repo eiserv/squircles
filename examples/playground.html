@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="de">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>squircles · Spielwiese</title>
+    <title>squircles · Playground</title>
     <link rel="stylesheet" href="/examples/demo.css" />
   </head>
   <body>
@@ -11,58 +11,58 @@
       <header>
         <div>
           <h1>squircles</h1>
-          <p>Weichere Ecken, direkt aus deinem CSS. Vergleiche die Glättung mit <code>border-radius</code>.</p>
+          <p>Smoother corners, straight from your CSS. Compare smoothing with <code>border-radius</code>.</p>
         </div>
-        <nav aria-label="Beispiele">
-          <a href="/react/">React-Beispiele</a>
+        <nav aria-label="Examples">
+          <a href="/react/">React examples</a>
           <a href="/svelte/">Svelte</a>
           <a href="https://github.com/eiserv/squircles">GitHub</a>
         </nav>
       </header>
 
-      <div class="werkzeug" id="werkzeug">
-        <form class="regler" id="regler" aria-label="Form einstellen">
-          <label><span>Breite <output id="breite-wert" for="breite"></output></span><input type="range" id="breite" min="80" max="420" value="200" /></label>
-          <label><span>Höhe <output id="hoehe-wert" for="hoehe"></output></span><input type="range" id="hoehe" min="32" max="180" value="96" /></label>
-          <label><span>Radius <output id="radius-wert" for="radius"></output></span><input type="range" id="radius" min="0" max="90" value="24" /></label>
-          <label><span>Glättung <output id="glaettung-wert" for="glaettung"></output></span><input type="range" id="glaettung" min="0" max="1" step="0.05" value="1" /></label>
-          <label><span>Kontur <output id="kontur-wert" for="kontur"></output></span><input type="range" id="kontur" min="0" max="6" step="0.5" value="1" /></label>
-          <label class="schalter"><input type="checkbox" id="erhalten" /><span>Glättung erhalten<small>Auch bei wenig Platz in den Ecken.</small></span></label>
+      <div class="playground" id="playground">
+        <form class="controls" id="controls" aria-label="Adjust the shape">
+          <label><span>Width <output id="width-value" for="width"></output></span><input type="range" id="width" min="80" max="420" value="200" /></label>
+          <label><span>Height <output id="height-value" for="height"></output></span><input type="range" id="height" min="32" max="180" value="96" /></label>
+          <label><span>Radius <output id="radius-value" for="radius"></output></span><input type="range" id="radius" min="0" max="90" value="24" /></label>
+          <label><span>Smoothing <output id="smoothing-value" for="smoothing"></output></span><input type="range" id="smoothing" min="0" max="1" step="0.05" value="1" /></label>
+          <label><span>Stroke <output id="stroke-value" for="stroke"></output></span><input type="range" id="stroke" min="0" max="6" step="0.5" value="1" /></label>
+          <label class="toggle"><input type="checkbox" id="preserve" /><span>Preserve smoothing<small>Even when corners run out of room.</small></span></label>
         </form>
 
-        <div class="vorschau">
-          <section class="vergleich" aria-label="Formvergleich">
+        <div class="preview">
+          <section class="comparison" aria-label="Shape comparison">
             <figure>
-              <div class="form-flaeche" id="squircle-flaeche"><svg id="squircle" role="img" aria-label="Form mit geglätteten Ecken"><path fill="#242424" stroke="#666" /></svg></div>
-              <figcaption><b>Squircle</b>Geglättete Übergänge</figcaption>
+              <div class="shape-stage" id="squircle-stage"><svg id="squircle" role="img" aria-label="Shape with smoothed corners"><path fill="#242424" stroke="#666" /></svg></div>
+              <figcaption><b>Squircle</b>Smoothed transitions</figcaption>
             </figure>
             <figure>
-              <div class="form-flaeche" id="radius-flaeche"><svg id="rundung" role="img" aria-label="Form mit kreisförmigen Ecken"><rect fill="#242424" stroke="#666" /></svg></div>
-              <figcaption><b>border-radius</b>Kreisförmige Ecken</figcaption>
+              <div class="shape-stage" id="radius-stage"><svg id="rounded" role="img" aria-label="Shape with circular corners"><rect fill="#242424" stroke="#666" /></svg></div>
+              <figcaption><b>border-radius</b>Circular corners</figcaption>
             </figure>
           </section>
-          <section class="analyse" id="analyse" aria-label="Konturen im Detail">
-            <figure><figcaption><b>Konturen im Vergleich</b>Gleiche Maße, gleiche Radien</figcaption><div class="form-flaeche"><svg id="ueberlagerung" role="img" aria-label="Überlagerte Konturen"></svg></div></figure>
-            <figure><figcaption><b>Die Ecke im Detail</b>Oben links, vergrößert</figcaption><div class="form-flaeche"><svg id="detail" role="img" aria-label="Vergrößerte linke obere Ecke"></svg></div></figure>
+          <section class="analysis" id="analysis" aria-label="Outlines in detail">
+            <figure><figcaption><b>Compare outlines</b>Same size, same radii</figcaption><div class="shape-stage"><svg id="overlay" role="img" aria-label="Overlaid outlines"></svg></div></figure>
+            <figure><figcaption><b>A closer look</b>Top left corner, enlarged</figcaption><div class="shape-stage"><svg id="detail" role="img" aria-label="Enlarged top left corner"></svg></div></figure>
           </section>
-          <div class="legende"><span>Squircle</span><span>border-radius</span></div>
+          <div class="legend"><span>Squircle</span><span>border-radius</span></div>
         </div>
       </div>
 
-      <p class="hinweis" id="hinweis" aria-live="polite"></p>
-      <details><summary>Geometrie als Code</summary><pre id="ausgabe"></pre></details>
+      <p class="note" id="note" aria-live="polite"></p>
+      <details><summary>Geometry as code</summary><pre id="output"></pre></details>
 
-      <section class="beispiele" aria-labelledby="css-beispiele">
-        <h2 id="css-beispiele">Mit gewöhnlichem CSS</h2>
-        <div class="reihe">
-          <article class="karte" data-demo>
-            <img class="kartenbild" data-demo src="/examples/formen.svg" alt="Zwei geglättete Formen in Grautönen" />
-            <div class="kartentext"><b>Eine Karte, weichere Ecken.</b><span>Hintergrund, Kontur und Schatten bleiben im CSS.</span></div>
+      <section class="examples" aria-labelledby="css-examples">
+        <h2 id="css-examples">With ordinary CSS</h2>
+        <div class="row">
+          <article class="card" data-demo>
+            <img class="card-image" data-demo src="/examples/shapes.svg" alt="Two smoothed shapes in grayscale" />
+            <div class="card-body"><b>A card with smoother corners.</b><span>Background, border, and shadow stay in CSS.</span></div>
           </article>
-          <div class="stapel">
-            <button class="taste" data-demo type="button">Mehr erfahren</button>
-            <label class="feld"><span>Texteingabe</span><input class="eingabe" data-demo value="Dein Text" /></label>
-            <span class="markierung" data-demo>Ohne Abhängigkeiten</span>
+          <div class="stack">
+            <button class="button" data-demo type="button">Learn more</button>
+            <label class="field"><span>Text input</span><input class="input" data-demo value="Your text" /></label>
+            <span class="badge" data-demo>No dependencies</span>
           </div>
         </div>
       </section>
@@ -73,75 +73,75 @@
 
       for (const element of document.querySelectorAll("[data-demo]")) applySquircle(element);
 
-      const felder = Object.fromEntries(
-        ["breite", "hoehe", "radius", "glaettung", "kontur", "erhalten"].map((name) => [name, document.getElementById(name)]),
+      const inputs = Object.fromEntries(
+        ["width", "height", "radius", "smoothing", "stroke", "preserve"].map((name) => [name, document.getElementById(name)]),
       );
       const squircle = document.getElementById("squircle");
-      const rundung = document.getElementById("rundung");
-      const ueberlagerung = document.getElementById("ueberlagerung");
+      const rounded = document.getElementById("rounded");
+      const overlay = document.getElementById("overlay");
       const detail = document.getElementById("detail");
       let frame = 0;
 
-      function zeichnen() {
+      function render() {
         frame = 0;
-        const width = Number(felder.breite.value);
-        const height = Number(felder.hoehe.value);
-        const radius = Number(felder.radius.value);
-        const smoothing = Number(felder.glaettung.value);
-        const strokeWidth = Number(felder.kontur.value);
-        const preserveSmoothing = felder.erhalten.checked;
-        const optionen = { width, height, radius, smoothing, preserveSmoothing };
-        const pfad = createSquirclePath(optionen);
-        const begrenzterRadius = Math.min(radius, width / 2, height / 2);
+        const width = Number(inputs.width.value);
+        const height = Number(inputs.height.value);
+        const radius = Number(inputs.radius.value);
+        const smoothing = Number(inputs.smoothing.value);
+        const strokeWidth = Number(inputs.stroke.value);
+        const preserveSmoothing = inputs.preserve.checked;
+        const options = { width, height, radius, smoothing, preserveSmoothing };
+        const path = createSquirclePath(options);
+        const cappedRadius = Math.min(radius, width / 2, height / 2);
 
-        for (const [name, feld] of Object.entries(felder)) {
-          if (name === "erhalten") continue;
-          document.getElementById(`${name}-wert`).value = name === "glaettung"
-            ? Number(feld.value).toLocaleString("de-DE", { minimumFractionDigits: 2 })
-            : `${feld.value} px`;
+        for (const [name, field] of Object.entries(inputs)) {
+          if (name === "preserve") continue;
+          document.getElementById(`${name}-value`).value = name === "smoothing"
+            ? Number(field.value).toLocaleString("en-US", { minimumFractionDigits: 2 })
+            : `${field.value} px`;
         }
 
-        // Beide Formen gemeinsam verkleinern, wenn die Vorschau zu schmal wird.
-        const platz = Math.min(...["squircle-flaeche", "radius-flaeche"].map((id) => document.getElementById(id).clientWidth - 48));
-        const faktor = Math.min(1, Math.max(1, platz) / width, 140 / height);
-        for (const svg of [squircle, rundung]) {
+        // Scale both shapes together when the preview becomes too narrow.
+        const space = Math.min(...["squircle-stage", "radius-stage"].map((id) => document.getElementById(id).clientWidth - 48));
+        const scale = Math.min(1, Math.max(1, space) / width, 140 / height);
+        for (const svg of [squircle, rounded]) {
           svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
-          svg.setAttribute("width", width * faktor);
-          svg.setAttribute("height", height * faktor);
+          svg.setAttribute("width", width * scale);
+          svg.setAttribute("height", height * scale);
           svg.firstElementChild.setAttribute("stroke-width", strokeWidth);
         }
-        squircle.firstElementChild.setAttribute("d", createSquirclePath({ ...optionen, inset: strokeWidth / 2 }));
+        squircle.firstElementChild.setAttribute("d", createSquirclePath({ ...options, inset: strokeWidth / 2 }));
         const inset = strokeWidth / 2;
-        for (const [name, wert] of Object.entries({ x: inset, y: inset, width: width - strokeWidth, height: height - strokeWidth, rx: Math.max(0, begrenzterRadius - inset) })) {
-          rundung.firstElementChild.setAttribute(name, wert);
+        for (const [name, value] of Object.entries({ x: inset, y: inset, width: width - strokeWidth, height: height - strokeWidth, rx: Math.max(0, cappedRadius - inset) })) {
+          rounded.firstElementChild.setAttribute(name, value);
         }
 
-        // Die gestrichelte Kontur bleibt auch ohne Farbakzent unterscheidbar.
-        const konturen = `<path d="${pfad}" fill="none" stroke="#242424" stroke-width="1.5" vector-effect="non-scaling-stroke" /><rect width="${width}" height="${height}" rx="${begrenzterRadius}" fill="none" stroke="#888" stroke-width="1.5" stroke-dasharray="4 4" vector-effect="non-scaling-stroke" />`;
-        ueberlagerung.setAttribute("viewBox", `-8 -8 ${width + 16} ${height + 16}`);
-        const ausschnitt = Math.max(8, Math.min(width / 2, height / 2, begrenzterRadius * 1.8));
-        detail.setAttribute("viewBox", `-2 -2 ${ausschnitt + 4} ${ausschnitt + 4}`);
-        ueberlagerung.innerHTML = konturen;
-        detail.innerHTML = konturen;
+        // The dashed outline stays distinct without relying on color.
+        const outlines = `<path d="${path}" fill="none" stroke="#242424" stroke-width="1.5" vector-effect="non-scaling-stroke" /><rect width="${width}" height="${height}" rx="${cappedRadius}" fill="none" stroke="#888" stroke-width="1.5" stroke-dasharray="4 4" vector-effect="non-scaling-stroke" />`;
+        overlay.setAttribute("viewBox", `-8 -8 ${width + 16} ${height + 16}`);
+        const crop = Math.max(8, Math.min(width / 2, height / 2, cappedRadius * 1.8));
+        detail.setAttribute("viewBox", `-2 -2 ${crop + 4} ${crop + 4}`);
+        overlay.innerHTML = outlines;
+        detail.innerHTML = outlines;
 
-        const start = /^M\s+(-?[\d.]+)/.exec(pfad);
-        const reichweite = start ? width - Number(start[1]) : 0;
-        const begrenzt = reichweite + .05 < (1 + smoothing) * begrenzterRadius;
-        document.getElementById("hinweis").textContent = radius === 0
-          ? "Ohne Radius sind beide Formen identisch."
+        const start = /^M\s+(-?[\d.]+)/.exec(path);
+        const reach = start ? width - Number(start[1]) : 0;
+        const constrained = reach + .05 < (1 + smoothing) * cappedRadius;
+        document.getElementById("note").textContent = radius === 0
+          ? "Without a radius, both shapes are identical."
           : smoothing === 0
-            ? "Ohne Glättung entspricht die Squircle einem abgerundeten Rechteck."
-            : begrenzt
+            ? "Without smoothing, the squircle is a rounded rectangle."
+            : constrained
               ? preserveSmoothing
-                ? "Wenig Platz: Die Kontrollpunkte werden zusammengedrückt, die Glättung bleibt erhalten."
-                : "Wenig Platz: Die Glättung wird wie in Figma begrenzt. Aktiviere bei Bedarf „Glättung erhalten“."
-              : "Die Glättung verlängert den Übergang zwischen gerader Kante und runder Ecke.";
-        document.getElementById("ausgabe").textContent = `createSquirclePath(${JSON.stringify({ ...optionen, inset }, null, 2)})`;
+                ? "Limited space: control points are compressed to preserve smoothing."
+                : "Limited space: smoothing is constrained as in Figma. Enable “Preserve smoothing” to keep it."
+              : "Smoothing extends the transition between straight edges and rounded corners.";
+        document.getElementById("output").textContent = `createSquirclePath(${JSON.stringify({ ...options, inset }, null, 2)})`;
       }
-      function vormerken() { if (!frame) frame = requestAnimationFrame(zeichnen); }
-      document.getElementById("regler").addEventListener("input", vormerken);
-      window.addEventListener("resize", vormerken);
-      zeichnen();
+      function schedule() { if (!frame) frame = requestAnimationFrame(render); }
+      document.getElementById("controls").addEventListener("input", schedule);
+      window.addEventListener("resize", schedule);
+      render();
     </script>
   </body>
 </html>

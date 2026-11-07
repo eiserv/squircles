@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { readBorderBox } from "../dist/dom/observe-size.js";
 
-test("verarbeitet ältere Observer mit einem einzelnen Größenobjekt", () => {
+test("handles older observers with a single size object", () => {
   const original = globalThis.getComputedStyle;
   globalThis.getComputedStyle = (element) => ({ writingMode: element.mode });
   try {
@@ -22,7 +22,7 @@ test("verarbeitet ältere Observer mit einem einzelnen Größenobjekt", () => {
   }
 });
 
-test("fehlende Border-Box-Daten erlauben die Ersatzmessung", () => {
+test("missing border-box data allows fallback measurement", () => {
   assert.equal(readBorderBox({ borderBoxSize: undefined }), null);
   assert.equal(readBorderBox({ borderBoxSize: [] }), null);
 });

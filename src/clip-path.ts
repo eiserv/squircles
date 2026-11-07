@@ -1,9 +1,6 @@
 import { createSquirclePath, type SquirclePathOptions } from "./geometry.js";
 
-/**
- * Erzeugt einen direkt verwendbaren CSS-Clip-Pfad. Leere Flächen ergeben den gültigen
- * Wert `none`.
- */
+/** Builds a ready-to-use CSS clip path. Empty boxes return the valid value `none`. */
 export function createSquircleClipPath(options: SquirclePathOptions): string {
   const path = createSquirclePath(options);
   return path === "" ? "none" : `path('${path}')`;

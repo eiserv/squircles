@@ -23,14 +23,14 @@ type PolymorphicRef<Component extends ElementType> =
 type SquircleOwnProps = {
   as?: ElementType;
   children?: ReactNode;
-  /** Überschreibt den CSS-Wert `border-radius`. */
+  /** Overrides the element's CSS border-radius. */
   radius?: SquircleRadius;
-  /** Überschreibt den CSS-Wert `--squircle-smoothing`. */
+  /** Overrides the element's CSS --squircle-smoothing. */
   smoothing?: number;
   preserveSmoothing?: boolean;
   /**
-   * Beschneidet zusätzlich die Kinder. Bei Bedienelementen mit außenliegender
-   * Fokusmarkierung deaktiviert lassen.
+   * Also clips children. Leave disabled on controls with focus outlines outside the
+   * shape.
    */
   clipContent?: boolean;
 };
@@ -81,8 +81,8 @@ function SquircleImplementation(
     return element ? applySquircle(element, options) : undefined;
   }, [Element, options]);
 
-  // Die Ebenen entstehen außerhalb von React. Zwei Argumente für createElement
-  // verhindern das children-Attribut bei leeren HTML-Elementen.
+  // Layers are managed outside React. Two createElement arguments omit children on
+  // void HTML elements.
   const hostProps = { ref, ...elementProps };
 
   return typeof Element === "string" && isVoidElement(Element)

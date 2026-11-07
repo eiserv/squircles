@@ -8,12 +8,12 @@ import {
 
 const REREAD_EVENTS = ["pointerenter", "pointerleave", "focusin", "focusout"] as const;
 
-/** Übergangsereignisse von Kindelementen ignorieren. */
+/** Ignores transition events from descendant elements. */
 const TRANSITION_EVENTS = ["transitionrun", "transitionend"] as const;
 
 /**
- * Formt ein Element anhand seines CSS. Die Rückgabe entfernt die Ebenen
- * und stellt die ursprünglichen Inline-Stile wieder her.
+ * Shapes an element from its CSS. The returned cleanup removes the layers and
+ * restores the authored inline styles.
  */
 export function applySquircle(
   element: HTMLElement,
@@ -31,11 +31,11 @@ export function applySquircle(
     }
 
     syncLayers(element, size, options);
-    // Eigene Stiländerungen verwerfen, damit keine Endlosschleife entsteht.
+    // Discard our own style mutations to avoid an endless update loop.
     mutationObserver.takeRecords();
   };
 
-  // Hover, Fokus und Klassenänderungen innerhalb eines Frames bündeln.
+  // Coalesce hover, focus, and class changes into a single frame.
   const schedule = (): void => {
     if (disposed || frame !== 0) {
       return;

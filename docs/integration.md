@@ -1,12 +1,12 @@
 # Integration
 
-## CSS als Ausgangspunkt
+## Start with CSS
 
-Die DOM-, React- und Svelte-Anbindungen verwenden dieselbe Darstellung.
-`border-radius` und die folgenden CSS-Variablen bestimmen die Form:
+The DOM, React, and Svelte integrations share the same renderer.
+`border-radius` and the following CSS custom properties define the shape:
 
 ```css
-.karte {
+.card {
   background: white;
   border: 1px solid #ddd;
   border-radius: 24px;
@@ -16,99 +16,99 @@ Die DOM-, React- und Svelte-Anbindungen verwenden dieselbe Darstellung.
 }
 ```
 
-Prozentuale Radien werden pro Achse aufgelöst. Bei elliptischen CSS-Ecken wird
-der einbeschriebene Kreis verwendet. Die obere Kontur bestimmt Breite und Farbe
-aller Seiten. Äußere Schatten unterstützen auch `oklch()` und `color()`.
-Innere Schatten lassen sich nicht mit äußeren Schatten kombinieren; bei einer
-gemischten Liste unterdrückt die Ersatzdarstellung den ursprünglichen Schatten.
+Percentage radii resolve per axis. Elliptical CSS corners use the inscribed
+circle. The top border determines the width and color of all sides. Outer
+shadows also support `oklch()` and `color()`. Inset and outer shadows cannot be
+combined: for mixed lists, the replacement rendering suppresses the original
+shadow, including its inset entries.
 
-Die optionalen Werte `radius`, `smoothing`, `preserveSmoothing` und `clipContent`
-überschreiben das CSS. `clipContent` beschneidet auch Kinder und außenliegende
-Fokusmarkierungen; auf Bedienelementen sollte es deshalb deaktiviert bleiben.
+The optional `radius`, `smoothing`, `preserveSmoothing`, and `clipContent` values
+override CSS. `clipContent` also clips children and external focus outlines;
+leave it disabled on controls that need those outlines.
 
-Änderungen der eigenen `class`- und `style`-Attribute, der Größe, des Hover- und
-Fokuszustands sowie Beginn und Ende eigener CSS-Übergänge lösen eine Aktualisierung
-aus. Änderungen ausschließlich an Vorfahren, Stylesheets oder Medienabfragen
-werden ohne eines dieser Ereignisse nicht automatisch erkannt.
+Changes to the element's own `class` and `style` attributes, size, hover and focus
+states, and the start and end of its own CSS transitions trigger updates.
+Changes exclusively to ancestors, stylesheets, or media queries are not detected
+automatically without one of these events.
 
-## React und Next.js
+## React and Next.js
 
 ```tsx
 import { Squircle } from "squircles/react";
 
-export function Karte() {
+export function Card() {
   return (
-    <Squircle as="article" className="karte">
-      <Squircle as="img" src="/foto.jpg" alt="Eine Berglandschaft" />
-      <p>Alle Eigenschaften des nativen Elements bleiben erhalten.</p>
+    <Squircle as="article" className="card">
+      <Squircle as="img" src="/photo.jpg" alt="A mountain landscape" />
+      <p>All native element properties remain available.</p>
     </Squircle>
   );
 }
 ```
 
-`as` akzeptiert auch eigene Komponenten, die ihre Ref an ein HTML-Element
-weiterreichen, etwa Next.js `Link`. Im App Router benötigt die aufrufende Datei
-`"use client"`. Die Geometriefunktionen können auch auf dem Server laufen.
-`Squircle` rendert dort zunächst nur das native Element; CSS liefert die Rundung.
+`as` also accepts custom components that forward their ref to an HTML element,
+such as Next.js `Link`. In the App Router, the calling file needs `"use client"`.
+Geometry functions can also run on the server. `Squircle` initially renders only
+its native element there, with CSS supplying the rounded-corner fallback.
 
-`useSquirclePath` und `useSquircleClipPath` messen eine eigene Ref. Mit der Option
-`size: { width, height }` funktionieren sie ohne Größenbeobachtung und bereits
-beim serverseitigen Rendern. Leere Flächen ergeben einen leeren Pfad bzw. `none`.
+`useSquirclePath` and `useSquircleClipPath` measure a custom ref. With the option
+`size: { width, height }`, they work without observation and during server-side
+rendering. Empty boxes produce an empty path or `none`.
 
-### Bestehende Komponenten und halbtransparente Konturen
+### Existing components and semi-transparent borders
 
-`SquircleSurface` zeichnet Füllung und Kontur gemeinsam als SVG-Pfad:
+`SquircleSurface` draws fill and stroke together on one SVG path:
 
 ```tsx
 import { SquircleSurface } from "squircles/react";
 
-<button className="eigene-taste">
+<button className="custom-button">
   <SquircleSurface radius={12} smoothing={1} fill="#242424"
     stroke="rgb(255 255 255 / 40%)" strokeWidth={1} />
-  <span>Mehr erfahren</span>
+  <span>Learn more</span>
 </button>
 ```
 
-Das Elternelement benötigt `position: relative`, transparente eigene Flächen
-und Konturen sowie Text oberhalb des SVG, etwa über `position: relative` am `span`.
-`width` und `height` ermöglichen auch hier eine feste Größe ohne Messung.
+The parent needs `position: relative`, transparent backgrounds and borders,
+and text above the SVG, for example with `position: relative` on the `span`.
+`width` and `height` also allow fixed dimensions without measurement.
 
 ## Svelte
 
-Die Action verwendet den [Lebenszyklus mit `update` und `destroy`](https://svelte.dev/docs/svelte-action).
-Sie importiert keine Svelte-Laufzeit und eignet sich für Svelte 4 und 5.
+The action uses the [`update` and `destroy` lifecycle](https://svelte.dev/docs/svelte-action).
+It imports no Svelte runtime and works with Svelte 4 and 5.
 
 ```svelte
 <script>
   import { squircle } from "squircles/svelte";
-  let glaettung = 1;
+  let smoothing = 1;
 </script>
 
-<input aria-label="Glättung" type="range" min="0" max="1" step="0.05"
-  bind:value={glaettung} />
-<button class="karte" use:squircle={{ smoothing: glaettung }}>
-  Mehr erfahren
+<input aria-label="Smoothing" type="range" min="0" max="1" step="0.05"
+  bind:value={smoothing} />
+<button class="card" use:squircle={{ smoothing }}>
+  Learn more
 </button>
 ```
 
-Neue Optionen ersetzen die bisherigen. Das Entfernen des Elements räumt
-Beobachter und Darstellung auf. Für Svelte ab 5.29 lässt sich die DOM-Funktion
-auch direkt als [Attachment](https://svelte.dev/docs/svelte/@attach) verwenden:
+New options replace previous ones. Removing the element cleans up observers and
+rendered layers. In Svelte 5.29 or later, the DOM function can also be used
+directly as an [attachment](https://svelte.dev/docs/svelte/@attach):
 
 ```svelte
 <script>
   import { applySquircle } from "squircles/dom";
 </script>
 
-<button class="karte" {@attach (element) => applySquircle(element)}>
-  Mehr erfahren
+<button class="card" {@attach (element) => applySquircle(element)}>
+  Learn more
 </button>
 ```
 
-## Vue und andere Frameworks
+## Vue and other frameworks
 
-`applySquircle` benötigt ein gemountetes HTML-Element und liefert eine
-Aufräumfunktion. Beispiel für Vue 3:
+`applySquircle` needs a mounted HTML element and returns a cleanup function.
+For example, in Vue 3:
 
 ```vue
 <script setup lang="ts">
@@ -116,35 +116,34 @@ import { onMounted, onBeforeUnmount, ref } from "vue";
 import { applySquircle } from "squircles/dom";
 
 const element = ref<HTMLElement | null>(null);
-let aufraeumen: (() => void) | undefined;
+let cleanup: (() => void) | undefined;
 onMounted(() => {
-  if (element.value) aufraeumen = applySquircle(element.value);
+  if (element.value) cleanup = applySquircle(element.value);
 });
-onBeforeUnmount(() => aufraeumen?.());
+onBeforeUnmount(() => cleanup?.());
 </script>
 
 <template>
-  <button ref="element" class="karte">Mehr erfahren</button>
+  <button ref="element" class="card">Learn more</button>
 </template>
 ```
 
-CSS-Änderungen am Element werden automatisch übernommen. Für neue
-Geometrieoptionen die bisherige Anbindung aufräumen und erneut anwenden.
-Die Aufräumfunktion darf mehrfach aufgerufen werden. Nachträgliche
-Inline-Stiländerungen bleiben beim Neuzeichnen und Aufräumen erhalten.
-Pro Element darf nur eine Anbindung gleichzeitig aktiv sein.
+CSS changes on the element are picked up automatically. To change geometry
+options, clean up the previous binding and apply it again. Cleanup can be called
+repeatedly. Later inline style changes survive redraws and cleanup.
+Only one active binding per element is supported.
 
-## Migration von 0.1
+## Migrating from 0.1
 
-Die Gestaltung von `Squircle` erfolgt seit 0.2 im CSS:
+Since 0.2, `Squircle` takes its paint styles from CSS:
 
-| Frühere Eigenschaft | CSS oder Ersatz |
+| Previous prop | CSS or replacement |
 | --- | --- |
 | `fill` | `background` |
 | `stroke` | `border-color` |
-| `strokeWidth` | `border-width` und `border-style: solid` |
-| `radius` | `border-radius` oder weiterhin die Option |
-| `smoothing` | `--squircle-smoothing` oder weiterhin die Option |
-| `surfaceClassName`, `surfaceStyle` | `[data-squircle-fill]` und `[data-squircle-stroke]` |
+| `strokeWidth` | `border-width` and `border-style: solid` |
+| `radius` | `border-radius`, or keep using the option |
+| `smoothing` | `--squircle-smoothing`, or keep using the option |
+| `surfaceClassName`, `surfaceStyle` | `[data-squircle-fill]` and `[data-squircle-stroke]` |
 
-`SquircleSurface` unterstützt weiterhin die SVG-Gestaltungseigenschaften.
+`SquircleSurface` still supports SVG paint props.

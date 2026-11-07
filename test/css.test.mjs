@@ -9,14 +9,14 @@ import {
 } from "../dist/css/index.js";
 import { isVoidElement } from "../dist/dom/index.js";
 
-/** Minimaler Ersatz für CSSStyleDeclaration. */
+/** Minimal stand-in for CSSStyleDeclaration. */
 function styles(values) {
   return {
     getPropertyValue: (property) => values[property] ?? "",
   };
 }
 
-test("liest vier Eckradien in Pixeln", () => {
+test("reads four pixel corners", () => {
   const radii = resolveRadiusFromComputed(
     styles({
       "border-top-left-radius": "12px",
@@ -35,17 +35,17 @@ test("liest vier Eckradien in Pixeln", () => {
   });
 });
 
-test("löst Prozentwerte anhand der kürzeren Achse auf", () => {
+test("resolves percentages against the shorter axis", () => {
   const radii = resolveRadiusFromComputed(
     styles({ "border-top-left-radius": "50%" }),
     { width: 200, height: 100 },
   );
 
-  // 50 % von 200 ergeben horizontal 100, vertikal 50. Der Kreis muss in beide Achsen passen.
+  // 50% of 200 is 100 horizontally and 50 vertically; the circle must fit both.
   assert.equal(radii.topLeft, 50);
 });
 
-test("verwendet den einbeschriebenen Kreis elliptischer Ecken", () => {
+test("takes the inscribed circle of an elliptical corner", () => {
   const radii = resolveRadiusFromComputed(
     styles({ "border-top-left-radius": "40px 10px" }),
     { width: 200, height: 100 },
@@ -54,7 +54,7 @@ test("verwendet den einbeschriebenen Kreis elliptischer Ecken", () => {
   assert.equal(radii.topLeft, 10);
 });
 
-test("behandelt fehlende und unlesbare Werte als null", () => {
+test("treats missing and unparseable values as zero", () => {
   const radii = resolveRadiusFromComputed(styles({}), {
     width: 200,
     height: 100,
@@ -68,14 +68,14 @@ test("behandelt fehlende und unlesbare Werte als null", () => {
   });
 });
 
-test("glättet standardmäßig vollständig ohne Erhaltungszwang", () => {
+test("defaults smoothing to full and preserve to off", () => {
   assert.deepEqual(resolveSmoothingFromComputed(styles({})), {
     smoothing: 1,
     preserveSmoothing: false,
   });
 });
 
-test("liest Glättung und Erhaltung aus CSS-Variablen", () => {
+test("reads smoothing and preserve from custom properties", () => {
   assert.deepEqual(
     resolveSmoothingFromComputed(
       styles({
@@ -87,7 +87,7 @@ test("liest Glättung und Erhaltung aus CSS-Variablen", () => {
   );
 });
 
-test("begrenzt die Glättung auf den gültigen Bereich", () => {
+test("clamps smoothing into the supported range", () => {
   assert.equal(
     resolveSmoothingFromComputed(styles({ "--squircle-smoothing": "5" }))
       .smoothing,
@@ -100,12 +100,12 @@ test("begrenzt die Glättung auf den gültigen Bereich", () => {
   );
 });
 
-test("liefert bei none keine Schatten", () => {
+test("returns nothing for none", () => {
   assert.deepEqual(parseBoxShadow("none"), []);
   assert.deepEqual(parseBoxShadow(""), []);
 });
 
-test("liest einen Schatten mit vier Längen", () => {
+test("parses a single shadow with all four lengths", () => {
   assert.deepEqual(parseBoxShadow("rgba(0, 0, 0, 0.15) 0px 4px 12px 2px"), [
     {
       color: "rgba(0, 0, 0, 0.15)",
@@ -117,13 +117,13 @@ test("liest einen Schatten mit vier Längen", () => {
   ]);
 });
 
-test("ergänzt fehlende Unschärfe und Ausbreitung", () => {
+test("defaults blur and spread when omitted", () => {
   assert.deepEqual(parseBoxShadow("rgb(0, 0, 0) 1px 2px"), [
     { color: "rgb(0, 0, 0)", offsetX: 1, offsetY: 2, blur: 0, spread: 0 },
   ]);
 });
 
-test("trennt Schatten ohne Farbfunktionen zu zerlegen", () => {
+test("splits multiple shadows without breaking on colour commas", () => {
   const shadows = parseBoxShadow(
     "rgba(0, 0, 0, 0.1) 0px 1px 2px 0px, rgba(0, 0, 0, 0.2) 0px 8px 24px -4px",
   );
@@ -134,7 +134,7 @@ test("trennt Schatten ohne Farbfunktionen zu zerlegen", () => {
   assert.equal(shadows[1].spread, -4);
 });
 
-test("überspringt innere Schatten", () => {
+test("skips inset shadows", () => {
   const shadows = parseBoxShadow(
     "rgb(0, 0, 0) 0px 2px 4px 0px inset, rgb(255, 0, 0) 0px 3px 6px 0px",
   );
@@ -143,13 +143,13 @@ test("überspringt innere Schatten", () => {
   assert.equal(shadows[0].color, "rgb(255, 0, 0)");
 });
 
-test("verarbeitet negative Versätze", () => {
+test("handles negative offsets", () => {
   assert.deepEqual(parseBoxShadow("rgb(0, 0, 0) -2px -4px 8px 0px"), [
     { color: "rgb(0, 0, 0)", offsetX: -2, offsetY: -4, blur: 8, spread: 0 },
   ]);
 });
 
-test("erhält moderne CSS-Farbfunktionen in Schatten", () => {
+test("preserves modern CSS color functions in shadows", () => {
   for (const color of [
     "oklch(40% 0.05 270 / 0.2)",
     "color(display-p3 0.2 0.3 0.4 / 0.5)",
@@ -162,13 +162,13 @@ test("erhält moderne CSS-Farbfunktionen in Schatten", () => {
   }
 });
 
-test("liest Schatten auch mit nachgestellter Farbe und ohne Farbangabe", () => {
+test("reads shadows with trailing colors or without a color", () => {
   assert.equal(parseBoxShadow("1px 2px 4px oklch(40% 0 0)")[0].color, "oklch(40% 0 0)");
   assert.equal(parseBoxShadow("1px 2px")[0].color, "currentColor");
-  assert.deepEqual(parseBoxShadow("unlesbar"), []);
+  assert.deepEqual(parseBoxShadow("unreadable"), []);
 });
 
-test("liest eine durchgezogene Kontur", () => {
+test("reads a solid border", () => {
   assert.deepEqual(
     readBorderFromComputed(
       styles({
@@ -181,7 +181,7 @@ test("liest eine durchgezogene Kontur", () => {
   );
 });
 
-test("zeichnet keine nicht unterstützten Konturstile", () => {
+test("reports no border for unsupported styles", () => {
   for (const style of ["none", "dashed", "dotted", "double"]) {
     assert.deepEqual(
       readBorderFromComputed(
@@ -197,7 +197,7 @@ test("zeichnet keine nicht unterstützten Konturstile", () => {
   }
 });
 
-test("zeichnet bei Breite null keine Kontur", () => {
+test("reports no border for a zero width", () => {
   assert.equal(
     readBorderFromComputed(
       styles({ "border-top-width": "0px", "border-top-style": "solid" }),
@@ -206,7 +206,7 @@ test("zeichnet bei Breite null keine Kontur", () => {
   );
 });
 
-test("kopiert Hintergrundeigenschaften und Übergänge", () => {
+test("copies the background longhands and the transition", () => {
   assert.deepEqual(
     readSurfaceFromComputed(
       styles({
@@ -229,7 +229,7 @@ test("kopiert Hintergrundeigenschaften und Übergänge", () => {
   );
 });
 
-test("nutzt transparente Vorgaben für ungestaltete Elemente", () => {
+test("falls back to transparent and none for a bare element", () => {
   assert.deepEqual(readSurfaceFromComputed(styles({})), {
     backgroundColor: "transparent",
     backgroundImage: "none",
@@ -240,13 +240,13 @@ test("nutzt transparente Vorgaben für ungestaltete Elemente", () => {
   });
 });
 
-test("erkennt leere HTML-Elemente", () => {
+test("recognises void elements", () => {
   for (const tag of ["img", "input", "br", "hr", "IMG", "INPUT"]) {
     assert.equal(isVoidElement(tag), true, tag);
   }
 });
 
-test("behandelt Container als nicht leer", () => {
+test("does not treat container elements as void", () => {
   for (const tag of ["div", "button", "a", "span", "section"]) {
     assert.equal(isVoidElement(tag), false, tag);
   }

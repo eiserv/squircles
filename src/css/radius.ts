@@ -20,8 +20,8 @@ function toPixels(value: string, basis: number): number {
 }
 
 /**
- * Reduziert elliptische CSS-Ecken auf den einbeschriebenen Kreis. Prozentwerte werden
- * vorher pro Achse aufgelöst.
+ * Reduces elliptical CSS corners to the inscribed circle. Percentages are resolved
+ * per axis first.
  */
 function resolveCorner(value: string, size: ElementSize): number {
   const parts = value.trim().split(/\s+/).filter(Boolean);

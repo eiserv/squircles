@@ -32,11 +32,11 @@ jobs:
 
       - run: npm ci
 
-      # Typprüfung, Erstellung, Tests und Prüfung des npm-Pakets.
+      # Type checking, build, tests, and a dry-run pack of the published files.
       - run: npm run check
 
   browser:
-    name: Browsertests
+    name: Browser tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7

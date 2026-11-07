@@ -24,7 +24,7 @@ const SHADOW = "data-squircle-shadow";
 const SELECTOR = `[${FILL}], [${STROKE}], [${SHADOW}]`;
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 
-/** Alle CSS-Eigenschaften, die syncLayers vom Element benötigt. */
+/** All CSS properties syncLayers needs from the host element. */
 const READ_PROPERTIES = [
   "border-top-left-radius",
   "border-top-right-radius",
@@ -57,7 +57,7 @@ function rememberInline(host: HTMLElement): void {
   }
 }
 
-/** Übernimmt nachträgliche Inline-Änderungen, etwa aus reaktiven Frameworks. */
+/** Preserves later inline changes, including those made by reactive frameworks. */
 function reconcileInline(host: HTMLElement): InlineState | undefined {
   const state = originalInline.get(host);
   if (!state || state.applied === host.style.cssText) return state;
@@ -86,8 +86,8 @@ function rememberApplied(host: HTMLElement): void {
 }
 
 /**
- * Hebt eigene Überschreibungen zum Lesen kurz auf. Übergänge bleiben dabei deaktiviert,
- * damit das Lesen keine neuen Übergänge und damit Endlosschleifen auslöst.
+ * Temporarily lifts our overrides while reading authored styles. Transitions stay
+ * disabled so reads cannot start new transitions and endless updates.
  */
 function readAuthoredStyles(host: HTMLElement): StyleReader {
   const applied = host.style.cssText;
@@ -95,7 +95,7 @@ function readAuthoredStyles(host: HTMLElement): StyleReader {
   const computed = getComputedStyle(host);
   const snapshot = new Map<string, string>();
 
-  // transition wird am Element nicht überschrieben und lässt sich direkt lesen.
+  // The host transition is never overridden, so it can be read directly.
   snapshot.set("transition", computed.getPropertyValue("transition"));
 
   host.style.cssText = authored;
@@ -109,8 +109,8 @@ function readAuthoredStyles(host: HTMLElement): StyleReader {
     snapshot.set(property, computed.getPropertyValue(property));
   }
 
-  // Überschreibungen bei deaktivierten Übergängen anwenden und erst danach die
-  // ursprüngliche Übergangsregel wiederherstellen.
+  // Apply overrides with transitions disabled, then restore the author's transition
+  // rule.
   host.style.cssText = applied;
   host.style.setProperty("transition", "none");
   computed.getPropertyValue("transition");
@@ -122,8 +122,8 @@ function readAuthoredStyles(host: HTMLElement): StyleReader {
 }
 
 /**
- * Absolute Positionen beziehen sich auf die Innenfläche, die Geometrie auf die
- * Rahmenfläche. Der negative Versatz gleicht die Rahmenbreite aus.
+ * Absolute positioning uses the padding box; geometry uses the border box. The
+ * negative offset compensates for the border width.
  */
 function createLayer(
   marker: string,
@@ -170,7 +170,7 @@ export function syncLayers(
   const shadows = parseBoxShadow(styles.getPropertyValue("box-shadow"));
   const geometry = { ...size, radius, smoothing, preserveSmoothing };
 
-  // Leere HTML-Elemente erhalten ausschließlich einen Clip-Pfad.
+  // Void elements receive only a clip path.
   if (isVoidElement(host.tagName)) {
     host.style.setProperty("clip-path", createSquircleClipPath(geometry));
     rememberApplied(host);
@@ -180,8 +180,7 @@ export function syncLayers(
   clearLayers(host);
   rememberInline(host);
 
-  // Den Schnappschuss verwenden: Erneutes Lesen ohne Überschreibungen könnte Übergänge
-  // auslösen.
+  // Use the snapshot: reading again without overrides could trigger transitions.
   if (styles.getPropertyValue("position") === "static") {
     host.style.setProperty("position", "relative");
   }
@@ -191,12 +190,12 @@ export function syncLayers(
   for (const shadow of shadows) {
     const width = size.width + shadow.spread * 2;
     const height = size.height + shadow.spread * 2;
-    // Stark negative Ausbreitung kann den Schatten vollständig aufbrauchen.
+    // A sufficiently negative spread can consume the entire shadow.
     if (width <= 0 || height <= 0) continue;
 
     const layer = createLayer(SHADOW, -3, border.width);
     layer.style.transform = `translate(${shadow.offsetX}px, ${shadow.offsetY}px)`;
-    // blur() erwartet die Standardabweichung, box-shadow deren doppelten Wert.
+    // blur() uses the standard deviation; box-shadow uses twice that value.
     layer.style.filter = `blur(${shadow.blur / 2}px)`;
 
     const shape = document.createElement("span");
@@ -214,7 +213,7 @@ export function syncLayers(
     host.append(layer);
   }
 
-  // Den ursprünglichen Schatten erst nach erfolgreichem Zeichnen unterdrücken.
+  // Suppress the original outer shadows after processing their replacement shapes.
   if (shadows.length > 0) {
     host.style.setProperty("box-shadow", "none");
   }
@@ -239,8 +238,8 @@ export function syncLayers(
     stroke.setAttribute("focusable", "false");
     stroke.setAttribute("preserveAspectRatio", "none");
     stroke.setAttribute("viewBox", `0 0 ${size.width} ${size.height}`);
-    // Die Korrektur der Rahmenfläche als explizite Größe; SVG verwendet sonst seine
-    // intrinsische Größe.
+    // Express the border-box correction as an explicit size; otherwise SVG uses its
+    // intrinsic size.
     const outset = `calc(100% + ${border.width * 2}px)`;
     stroke.style.cssText = `position:absolute;left:${-border.width}px;top:${-border.width}px;z-index:-1;width:${outset};height:${outset};overflow:visible;pointer-events:none;display:block;`;
 
@@ -258,7 +257,7 @@ export function syncLayers(
     stroke.append(path);
     host.append(stroke);
 
-    // Die transparente Kontur erhält die Abmessungen und verhindert Layoutsprünge.
+    // A transparent border preserves dimensions and prevents layout shifts.
     host.style.setProperty("border-color", "transparent");
   }
 

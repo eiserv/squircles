@@ -8,7 +8,7 @@ const cases = [
   { width: 48, height: 48, radius: 12, smoothing: 1, strokeWidth: 1 },
   { width: 180, height: 64, radius: 20, smoothing: 1, strokeWidth: 1.5 },
   { width: 240, height: 96, radius: 32, smoothing: 0.8, strokeWidth: 2 },
-  // Karte, Fläche ohne Kontur und Pillenform wie auf den Beispielseiten.
+  // Card, borderless surface, and pill, matching the example pages.
   { width: 260, height: 180, radius: 20, smoothing: 1, strokeWidth: 1 },
   { width: 260, height: 120, radius: 12, smoothing: 1, strokeWidth: 0 },
   { width: 120, height: 32, radius: 999, smoothing: 1, strokeWidth: 1 },
@@ -50,11 +50,11 @@ const rows = cases
   .join("");
 
 const html = `<!doctype html>
-<html lang="de">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Squircle-Geometriebeispiele</title>
+    <title>Squircle geometry examples</title>
     <style>
       * { box-sizing: border-box; }
       body {
@@ -104,8 +104,8 @@ const html = `<!doctype html>
   </head>
   <body>
     <main>
-      <h1>Squircle-Rasterisierung</h1>
-      <p>Ein Pfad, eine Füllung und eine SVG-Kontur, um ihre halbe Breite nach innen versetzt.</p>
+      <h1>Squircle rasterization</h1>
+      <p>One path, one fill, and an SVG stroke inset by half its width.</p>
       <section>${rows}</section>
     </main>
   </body>

@@ -4,32 +4,32 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { Squircle, SquircleSurface } from "../dist/react/index.js";
 
-test("rendert das semantische Element ohne zusätzliche Hülle", () => {
+test("renders the semantic host and nothing else", () => {
   const html = renderToStaticMarkup(
     createElement(
       Squircle,
       { as: "button", type: "button", radius: 8, className: "button" },
-      "Mehr erfahren",
+      "Learn more",
     ),
   );
 
   assert.equal(
     html,
-    '<button type="button" class="button">Mehr erfahren</button>',
+    '<button type="button" class="button">Learn more</button>',
   );
 });
 
-test("unterstützt leere HTML-Elemente", () => {
+test("does not crash on a void element", () => {
   const html = renderToStaticMarkup(
-    createElement(Squircle, { as: "img", src: "/a.jpg", alt: "Ein Bild" }),
+    createElement(Squircle, { as: "img", src: "/a.jpg", alt: "A picture" }),
   );
 
-  // React 19 ergänzt einen Ladehinweis für Bilder; hier zählt nur das Bildelement.
-  assert.match(html, /<img src="\/a\.jpg" alt="Ein Bild"\/>/);
+  // React 19 also emits an image preload link; only the image element matters here.
+  assert.match(html, /<img src="\/a\.jpg" alt="A picture"\/>/);
   assert.doesNotMatch(html, /<img[^>]*>[^<]/);
 });
 
-test("reicht übergebene Stile unverändert weiter", () => {
+test("passes the caller's style through untouched", () => {
   const html = renderToStaticMarkup(
     createElement(Squircle, {
       as: "div",
@@ -40,7 +40,7 @@ test("reicht übergebene Stile unverändert weiter", () => {
   assert.match(html, /style="padding:12px"/);
 });
 
-test("rendert auf dem Server eine deterministische SVG-Fläche mit festen Maßen", () => {
+test("renders a deterministic fixed-size SVG surface on the server", () => {
   const html = renderToStaticMarkup(
     createElement(SquircleSurface, {
       width: 120,
