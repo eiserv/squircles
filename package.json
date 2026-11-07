@@ -1,6 +1,6 @@
 {
   "name": "squircles",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Dependency-free Figma-style corner smoothing with DOM, React, and Svelte integrations.",
   "type": "module",
   "sideEffects": false,

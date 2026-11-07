@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/eiserv/squircles/compare/v0.2.1...v0.3.0) (2026-11-07)
+
+
+### Features
+
+* simplify playground and harden framework integrations ([#5](https://github.com/eiserv/squircles/issues/5)) ([b6156f8](https://github.com/eiserv/squircles/commit/b6156f8b394ad241a699ef87ec04501a5757d6ad))
+
 ## [0.2.1](https://github.com/eiserv/squircles/compare/v0.2.0...v0.2.1) (2026-10-05)
 
 
