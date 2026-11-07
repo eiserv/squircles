@@ -17,7 +17,7 @@ export type SquircleClipPathResult = Readonly<{
   ready: boolean;
 }>;
 
-/** Gives an own component the CSS `clip-path` value for its measured box. */
+/** Returns a CSS clip path for the measured box of a custom component. */
 export function useSquircleClipPath<T extends Element>(
   ref: RefObject<T | null>,
   options: UseSquircleClipPathOptions = {},

@@ -1,140 +1,95 @@
 # Architecture
 
-## Why SVG instead of a mask
+## Package boundaries
 
-The outer fill and border must be rasterized from the same geometry. Building a
-border from an outer clip path plus a separately calculated inner mask has
-three failure modes:
+- `squircles`: pure geometry with no DOM access or runtime dependencies.
+- `squircles/dom`: CSS-driven rendering through `applySquircle`.
+- `squircles/react`: components and hooks, with React as an optional peer.
+- `squircles/svelte`: an action with updates and cleanup, without a Svelte import.
+- `src/css/`: structural readers for computed CSS values, testable in Node.
 
-1. reducing the radius does not create an exact parallel offset of a smoothed
-   Bézier curve;
-2. `clip-path` and an encoded SVG mask can be rasterized in separate passes;
-3. fractional layout sizes can quantize those two passes differently.
+The public API, documentation, comments, examples, and error messages use English.
 
-This package draws one SVG path with both `fill` and `stroke`. The path is inset
-by half the stroke width, so the complete stroke stays inside the component
-box. There is no inner contour to drift away from the outer contour.
+## Geometry and borders
 
-## Layers
+The geometry follows Figma's published cubic Bézier construction:
+`smoothing: 0` uses circular arcs; `1` uses fully smoothed transitions.
+Each corner receives a proportional share of its adjacent sides. When space is
+limited, smoothing is constrained. `preserveSmoothing` instead compresses the
+first control points.
 
-- `squircles` is pure geometry and has no runtime dependencies.
-- `squircles/dom` adds `applySquircle`, which shapes any element from its own
-  CSS. It has no React dependency.
-- `squircles/react` adds the `Squircle`, `SquircleSurface`, `useSquirclePath`,
-  and `useSquircleClipPath` APIs.
-- React is an optional peer dependency. The geometry entry point does not load
-  React and does not touch the DOM.
-- `src/css/` converts `CSSStyleDeclaration` values into plain data. It never
-  reaches for a DOM global, which is what makes it unit-testable under
-  `node --test`.
+Borders use an SVG stroke on a path inset by half the stroke width. There is no
+separate inner mask: simply shrinking a corner radius would not produce an exact
+parallel offset of a Bézier curve. Sources and acknowledgments are in `NOTICE`.
 
-## Paint model
+## Rendering layers
 
-`Squircle` renders only the host element and calls `applySquircle` in an effect,
-so the paint layers never pass through React reconciliation. That is also why a
-void element such as `img` works: nothing is rendered as its child.
+`Squircle` renders only its native element. An effect binds `applySquircle` to
+that element, keeping rendering layers outside React reconciliation. Changing
+`as` removes the previous binding and measures the new element.
 
-`applySquircle` appends up to three kinds of absolutely positioned layer inside
-the host, each with `pointer-events: none`:
+| Layer | Stacking order | Purpose |
+| --- | --- | --- |
+| `[data-squircle-shadow]` | -3 | An offset, blurred shape for each outer shadow |
+| `[data-squircle-fill]` | -2 | A copied background clipped to the smoothed shape |
+| `[data-squircle-stroke]` | -1 | An SVG stroke on the smoothed path |
 
-| Layer | z-index | Purpose |
-|---|---|---|
-| `[data-squircle-shadow]` (one per shadow) | -3 | An offset, blurred, colour-filled shape, clipped to the contour grown by the shadow's spread |
-| `[data-squircle-fill]` | -2 | The host's copied background longhands, clipped to the contour |
-| `[data-squircle-stroke]` | -1 | An SVG path carrying the border as a stroke |
+All layers ignore pointer events. Their negative offset by the border width
+compensates for the difference between padding and border boxes. The original
+border becomes transparent but retains its width to prevent layout shifts.
+The host is not clipped by default, keeping shadows and focus outlines visible.
 
-All three layers are offset outwards by the border width. The geometry is
-measured on the border box, but absolute offsets inside the host resolve against
-its padding box, so on a bordered element the two would disagree by the border
-width on every side — the outermost band of the contour would fall outside the
-layer and the corners would be cut off square.
+The SVG stroke covers the clipped background edge. Semi-transparent borders may
+expose that edge; `SquircleSurface` avoids this by drawing fill and stroke
+together on one SVG path.
 
-The host itself is deliberately **not** clipped. `clip-path` removes everything
-outside the contour, including shadows and including descendants, so clipping
-the host would make shadows impossible. Instead the host's background is copied
-onto the fill layer and the host is set to `transparent`; its `border-color` is
-set to `transparent` rather than removing the border, so the border box and the
-layout stay intact.
+## Reading and restoring CSS
 
-Separating surface and stroke does not reintroduce the two-contour problem. The
-stroke is inset by half its width and completely covers the fill's clip edge, so
-there is still never a fill edge and a border edge that must agree. A
-semi-transparent border is the exception: the clip edge shows through it, and
-`SquircleSurface` remains the escape hatch for that case.
+Our overrides are temporarily lifted to read authored styles. Transitions stay
+disabled during the read to prevent new transitions or endless updates.
+Updates are coalesced per animation frame; our own mutation records are discarded
+afterward.
 
-## Reading the author's CSS
+Each element stores its authored and most recently applied inline styles.
+Differences from the applied state are merged into the authored state, preserving
+later framework changes across redraws and cleanup. Assigning exactly the same
+value already applied by the library cannot be distinguished from our override.
 
-Because the layers overwrite `background-color`, `background-image`,
-`border-color`, and `box-shadow` on the host, those overrides are lifted again
-for the duration of every read. Two consequences are worth knowing:
+Only one binding per element is supported. Cleanup is idempotent and removes
+observers, event handlers, pending frames, and our own layers.
 
-- each re-read costs one style recalculation, which is why reads are coalesced
-  into a single `requestAnimationFrame`;
-- transitions are suppressed during the read. Lifting an override on a property
-  that carries a transition makes the browser interpolate from the override, so
-  a plain read returns the value in flight rather than the authored target. A
-  hovered button with a background transition would otherwise keep its idle
-  colour.
+## Size measurement
 
-## Geometry
+DOM and React share the same measurement code. `ResizeObserver` provides logical
+inline and block dimensions, which are mapped to physical width and height using
+`writing-mode`, including `vertical-*` and `sideways-*`. Sizes are rounded to
+1/64 pixel to avoid updates caused by tiny measurement differences.
 
-The curve uses the cubic Bézier construction described in Figma's
-"Desperately seeking squircles" article:
+Without `ResizeObserver`, dimensions are measured on startup and window resize.
+Other layout changes require a polyfill. Fixed sizes bypass measurement in the
+React hooks. Boxes with zero width or height have no visible valid path.
 
-- smoothing `0` is a normal circular corner;
-- smoothing `1` uses the full transition and no circular arc;
-- each corner gets a proportional budget on its two adjacent sides;
-- by default smoothing is reduced if the requested curve would exceed that
-  budget, matching Figma's documented constraint;
-- `preserveSmoothing` keeps the requested smoothing and compresses the first
-  Bézier controls instead.
+## Limits
 
-The implementation is original TypeScript structured around immutable corner
-data, explicit input validation, per-corner radii, and stroke insetting. The
-published Figma article and the MIT-licensed reference implementations are
-credited in `NOTICE`.
+- `outline` and inset shadows still follow ordinary CSS rounding.
+- Only solid borders based on the top border values are drawn.
+- Elliptical radii are reduced to the inscribed circle.
+- Void HTML elements such as `img` and `input` receive a clip path directly,
+  which also clips their own border and shadow.
+- `backdrop-filter` remains rectangular unless `clipContent` is enabled.
+- Shadow lists are composited as individual layers. Inset shadows are not
+  redrawn; in mixed lists, they disappear when the original shadow is suppressed.
+- Changes exclusively to ancestors or stylesheets need an observed event on the
+  element, such as a size or class change.
+- Background transitions are forwarded; geometry and border changes are redrawn
+  at update time.
+- Fractional physical pixels can still produce slightly different rasterization
+  on opposite edges.
 
-## Rendering contract
+## Verification and images
 
-`Squircle` is the high-level, polymorphic component. It:
-
-- preserves the semantic host (`div`, `button`, `a`, `img`, or a custom React
-  component);
-- measures only layout-size changes with `ResizeObserver`;
-- falls back to the element's own `border-radius` before the first measurement,
-  which needs no special handling because the host keeps its own CSS;
-- does not clip focus outlines by default;
-- re-reads on `ResizeObserver`, on `class` and `style` mutations, and on
-  `pointerenter`, `pointerleave`, `focusin`, `focusout`, `transitionrun`, and
-  `transitionend`.
-
-Void elements (`img`, `input`, and the rest) cannot hold layers. They get
-`clip-path` directly and therefore support neither a border nor a shadow; wrap
-them in a `Squircle` when those are needed.
-
-`SquircleSurface` is the low-level SVG visual. It is useful inside an existing
-component that already owns positioning, semantics, and fallback behavior.
-
-## Known boundaries
-
-No renderer can make the two physical edges of an element land on identical
-device-pixel phases when the element itself has a fractional physical-pixel
-width. This package avoids amplifying that unavoidable rasterization detail:
-it does not quantize layout to arbitrary quarter pixels, and it never combines
-two independently rasterized contours.
-
-Beyond that, and by decision rather than by accident:
-
-- `outline`, and therefore every focus ring, follows `border-radius`. No
-  renderer exposes a hook to change that.
-- Only `border-top-width`, `border-top-style`, and `border-top-color` are read.
-  Per-side borders cannot be expressed as one stroke.
-- Only `border-style: solid` is drawn. `stroke-dasharray` could approximate
-  dashed and dotted borders, but the dash rhythm around a smoothed curve would
-  not match what CSS draws.
-- `inset` shadows are ignored and left on the element.
-- Multiple shadows become one layer each. They composite as stacked layers
-  rather than the way `box-shadow` composites its list.
-- `backdrop-filter` on the host stays rectangular, because the host is not
-  clipped.
-- An element whose size is animated recalculates its path once per frame.
+`npm run check` verifies types, geometry, CSS readers, server-side React rendering,
+and package contents. `npm run test:browser` checks DOM lifecycles, style changes,
+writing modes, and the playground in Chromium. `npm run screenshots` captures the
+playground and renders its shadow into a transparent PNG margin. Image widths in
+the README are explicitly limited.

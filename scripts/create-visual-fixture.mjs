@@ -8,7 +8,7 @@ const cases = [
   { width: 48, height: 48, radius: 12, smoothing: 1, strokeWidth: 1 },
   { width: 180, height: 64, radius: 20, smoothing: 1, strokeWidth: 1.5 },
   { width: 240, height: 96, radius: 32, smoothing: 0.8, strokeWidth: 2 },
-  // Card, borderless surface, and pill, matching the new example pages.
+  // Card, borderless surface, and pill, matching the example pages.
   { width: 260, height: 180, radius: 20, smoothing: 1, strokeWidth: 1 },
   { width: 260, height: 120, radius: 12, smoothing: 1, strokeWidth: 0 },
   { width: 120, height: 32, radius: 999, smoothing: 1, strokeWidth: 1 },
@@ -36,8 +36,8 @@ const rows = cases
           >
             <path
               d="${path}"
-              fill="${index % 2 === 0 ? "#192d73" : "#ffffff"}"
-              stroke="${index % 2 === 0 ? "#edaa2b" : "#192d73"}"
+              fill="${index % 2 === 0 ? "#242424" : "#ffffff"}"
+              stroke="${index % 2 === 0 ? "#888888" : "#242424"}"
               stroke-width="${strokeWidth}"
               vector-effect="non-scaling-stroke"
               shape-rendering="geometricPrecision"
@@ -54,13 +54,13 @@ const html = `<!doctype html>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Squircle visual fixture</title>
+    <title>Squircle geometry examples</title>
     <style>
       * { box-sizing: border-box; }
       body {
         margin: 0;
-        background: #f3f5fa;
-        color: #192d73;
+        background: #f7f7f7;
+        color: #242424;
         font: 16px/1.4 system-ui, sans-serif;
       }
       main {
@@ -68,7 +68,7 @@ const html = `<!doctype html>
         margin: 48px auto;
       }
       h1 { margin: 0 0 8px; }
-      p { margin: 0 0 32px; color: #52607f; }
+      p { margin: 0 0 32px; color: #666666; }
       section {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -76,7 +76,7 @@ const html = `<!doctype html>
       }
       article {
         overflow: hidden;
-        border: 1px solid #dce1ed;
+        border: 1px solid #dedede;
         border-radius: 16px;
         background: white;
       }
@@ -85,27 +85,27 @@ const html = `<!doctype html>
         display: grid;
         place-items: center;
         background-image:
-          linear-gradient(45deg, rgba(25, 45, 115, .035) 25%, transparent 25%),
-          linear-gradient(-45deg, rgba(25, 45, 115, .035) 25%, transparent 25%),
-          linear-gradient(45deg, transparent 75%, rgba(25, 45, 115, .035) 75%),
-          linear-gradient(-45deg, transparent 75%, rgba(25, 45, 115, .035) 75%);
+          linear-gradient(45deg, rgba(0, 0, 0, .035) 25%, transparent 25%),
+          linear-gradient(-45deg, rgba(0, 0, 0, .035) 25%, transparent 25%),
+          linear-gradient(45deg, transparent 75%, rgba(0, 0, 0, .035) 75%),
+          linear-gradient(-45deg, transparent 75%, rgba(0, 0, 0, .035) 75%);
         background-position: 0 0, 0 8px, 8px -8px, -8px 0;
         background-size: 16px 16px;
       }
-      .stage.dark { background-color: #bed7e8; }
+      .stage.dark { background-color: #dddddd; }
       svg { display: block; overflow: visible; }
       code {
         display: block;
         padding: 14px 16px;
-        border-top: 1px solid #e7eaf1;
+        border-top: 1px solid #dedede;
         font-size: 13px;
       }
     </style>
   </head>
   <body>
     <main>
-      <h1>Squircle rasterization fixture</h1>
-      <p>One path, one fill, one centered SVG stroke inset by half its width.</p>
+      <h1>Squircle rasterization</h1>
+      <p>One path, one fill, and an SVG stroke inset by half its width.</p>
       <section>${rows}</section>
     </main>
   </body>

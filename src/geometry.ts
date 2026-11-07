@@ -12,18 +12,18 @@ export type SquirclePathOptions = Readonly<{
   height: number;
   radius?: SquircleRadius;
   /**
-   * Figma corner smoothing in the range 0..1.
-   * 0 is a regular rounded rectangle; 1 is fully smoothed.
+   * Figma corner smoothing from 0 to 1: 0 uses circular arcs; 1 uses fully smoothed
+   * transitions.
    */
   smoothing?: number;
   /**
-   * Keeps the requested smoothing when a corner has little room.
-   * Figma-compatible budget clamping is used by default.
+   * Preserves smoothing when a corner runs out of room. By default, smoothing is
+   * constrained as in Figma.
    */
   preserveSmoothing?: boolean;
   /**
-   * Moves the path inward on all sides and reduces the radii by the same
-   * amount. Use half a stroke width to keep an SVG stroke inside the box.
+   * Insets the path and reduces the radii by the same amount. Half a stroke width
+   * keeps the SVG stroke inside the box.
    */
   inset?: number;
   /** Decimal places used in the generated SVG path. */
@@ -107,8 +107,8 @@ function insetRadii(
 }
 
 /**
- * Allocates each corner a share of both adjacent sides. This is deterministic,
- * symmetric, and guarantees that neighboring corner reaches never overlap.
+ * Allocates each corner a deterministic, symmetric share of its adjacent sides,
+ * preventing neighboring corners from overlapping.
  */
 function getCornerBudgets(
   width: number,
@@ -278,11 +278,8 @@ function topLeft(curve: CornerCurve, number: (value: number) => string) {
 }
 
 /**
- * Creates a compact SVG path for Figma-style smoothed corners.
- *
- * The implementation follows Figma's published cubic Bézier construction.
- * It adds strict input handling, per-corner radii, deterministic corner
- * budgeting, and an inset mode intended for artifact-free SVG strokes.
+ * Creates a compact SVG path using Figma's cubic Bézier construction, with input
+ * validation, per-corner radii, and optional stroke insetting.
  */
 export function createSquirclePath({
   width,

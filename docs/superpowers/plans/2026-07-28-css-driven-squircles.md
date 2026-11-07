@@ -1695,8 +1695,8 @@ Insert after the `.insights` section, before `<section class="panel code">`:
       <div class="demo-card" id="demo-card">
         <img class="demo-card__image" id="demo-image" src="../docs/media/playground.png" alt="" />
         <div class="demo-card__body">
-          <b>Card mit Schatten</b>
-          <span>Hintergrund, Rand und Schatten kommen aus CSS.</span>
+          <b>Card with a shadow</b>
+          <span>Background, border, and shadow come from CSS.</span>
         </div>
       </div>
     </div>
@@ -1708,7 +1708,7 @@ Insert after the `.insights` section, before `<section class="panel code">`:
       <input class="demo-input" id="demo-input" type="text" value="Eingabefeld" />
       <span class="demo-badge" id="demo-badge">Badge</span>
     </div>
-    <p class="stage__caption"><b>Input und Badge</b><span>beliebige Elemente</span></p>
+    <p class="stage__caption"><b>Input and badge</b><span>any element</span></p>
   </article>
 </section>
 ```

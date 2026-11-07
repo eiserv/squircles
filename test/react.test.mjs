@@ -24,7 +24,7 @@ test("does not crash on a void element", () => {
     createElement(Squircle, { as: "img", src: "/a.jpg", alt: "A picture" }),
   );
 
-  // React 19 also emits a preload link for images; only the tag itself matters.
+  // React 19 also emits an image preload link; only the image element matters here.
   assert.match(html, /<img src="\/a\.jpg" alt="A picture"\/>/);
   assert.doesNotMatch(html, /<img[^>]*>[^<]/);
 });

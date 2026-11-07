@@ -1,10 +1,9 @@
 import type { SquircleShadow } from "./types.js";
 
-const COLOR = /(rgba?\([^)]*\)|#[0-9a-f]{3,8}|\b[a-z]+\b(?!\s*\())/i;
-const LENGTH = /-?\d*\.?\d+px/g;
+const LENGTH = /^-?(?:\d*\.)?\d+(?:e[+-]?\d+)?px$/i;
 
-/** Splits on commas that are not inside a colour function. */
-function splitShadows(value: string): string[] {
+/** Splits only outside functions, including arbitrarily nested functions. */
+function splitOutsideFunctions(value: string, separator: RegExp): string[] {
   const parts: string[] = [];
   let depth = 0;
   let current = "";
@@ -14,7 +13,7 @@ function splitShadows(value: string): string[] {
       depth += 1;
     } else if (character === ")") {
       depth -= 1;
-    } else if (character === "," && depth === 0) {
+    } else if (separator.test(character) && depth === 0) {
       parts.push(current);
       current = "";
       continue;
@@ -25,13 +24,10 @@ function splitShadows(value: string): string[] {
 
   parts.push(current);
 
-  return parts.filter((part) => part.trim() !== "");
+  return parts.map((part) => part.trim()).filter(Boolean);
 }
 
-/**
- * Computed `box-shadow` always serialises the colour first, which is why the
- * colour can be lifted out before the lengths are read.
- */
+/** Preserves modern color functions such as oklch() and color(). */
 function parseShadow(part: string): SquircleShadow | null {
   const text = part.trim();
 
@@ -39,10 +35,11 @@ function parseShadow(part: string): SquircleShadow | null {
     return null;
   }
 
-  const color = COLOR.exec(text)?.[0] ?? "currentColor";
-  const lengths = text.replace(color, " ").match(LENGTH);
+  const tokens = splitOutsideFunctions(text, /\s/);
+  const lengths = tokens.filter((token) => LENGTH.test(token));
+  const color = tokens.filter((token) => !LENGTH.test(token)).join(" ") || "currentColor";
 
-  if (!lengths || lengths.length < 2) {
+  if (lengths.length < 2 || lengths.length > 4) {
     return null;
   }
 
@@ -64,7 +61,7 @@ export function parseBoxShadow(value: string): readonly SquircleShadow[] {
     return [];
   }
 
-  return splitShadows(text)
+  return splitOutsideFunctions(text, /,/)
     .map(parseShadow)
     .filter((shadow): shadow is SquircleShadow => shadow !== null);
 }

@@ -1,6 +1,6 @@
 /**
- * The slice of CSSStyleDeclaration these readers need. Declaring it
- * structurally keeps this directory free of DOM types and testable in Node.
+ * The structural subset of CSSStyleDeclaration needed by the readers, keeping them
+ * testable in Node without a DOM.
  */
 export type StyleReader = Readonly<{
   getPropertyValue(property: string): string;

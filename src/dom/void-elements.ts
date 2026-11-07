@@ -15,8 +15,8 @@ const VOID_ELEMENTS = new Set([
 ]);
 
 /**
- * Void elements cannot hold layers, so they are shaped with `clip-path`
- * directly and lose border and shadow support.
+ * Void HTML elements cannot contain layers. Their clip path also clips their border
+ * and shadow.
  */
 export function isVoidElement(tag: string): boolean {
   return VOID_ELEMENTS.has(tag.toLowerCase());

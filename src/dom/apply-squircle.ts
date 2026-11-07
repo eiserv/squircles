@@ -1,23 +1,19 @@
 import type { ElementSize } from "../size.js";
+import { observeElementSize } from "./observe-size.js";
 import {
   clearLayers,
   syncLayers,
   type SquircleGeometryOptions,
 } from "./layers.js";
 
-/** Matches the quantisation the React hook already uses. */
-function roundLayoutSize(value: number): number {
-  return Math.round(value * 64) / 64;
-}
-
 const REREAD_EVENTS = ["pointerenter", "pointerleave", "focusin", "focusout"] as const;
 
-/** Only the host's own transitions; these bubble up from every descendant. */
+/** Ignores transition events from descendant elements. */
 const TRANSITION_EVENTS = ["transitionrun", "transitionend"] as const;
 
 /**
- * Shapes an element from its own CSS and keeps it in sync. Returns a cleanup
- * function that removes the layers and restores the inline style.
+ * Shapes an element from its CSS. The returned cleanup removes the layers and
+ * restores the authored inline styles.
  */
 export function applySquircle(
   element: HTMLElement,
@@ -35,12 +31,11 @@ export function applySquircle(
     }
 
     syncLayers(element, size, options);
-    // syncLayers writes the host's own inline style. Drop those records so
-    // the observer below does not schedule another sync every frame.
+    // Discard our own style mutations to avoid an endless update loop.
     mutationObserver.takeRecords();
   };
 
-  // Hover, focus, and class changes all land in the same frame.
+  // Coalesce hover, focus, and class changes into a single frame.
   const schedule = (): void => {
     if (disposed || frame !== 0) {
       return;
@@ -49,12 +44,7 @@ export function applySquircle(
     frame = requestAnimationFrame(sync);
   };
 
-  const measure = (width: number, height: number): void => {
-    const next = {
-      width: roundLayoutSize(width),
-      height: roundLayoutSize(height),
-    };
-
+  const measure = (next: ElementSize): void => {
     if (size?.width === next.width && size.height === next.height) {
       return;
     }
@@ -63,34 +53,13 @@ export function applySquircle(
     schedule();
   };
 
-  const resizeObserver = new ResizeObserver((entries) => {
-    const entry = entries.at(-1);
-
-    if (!entry) {
-      return;
-    }
-
-    const sizes = entry.borderBoxSize as
-      | ResizeObserverSize
-      | readonly ResizeObserverSize[];
-    const box = Array.isArray(sizes) ? sizes[0] : (sizes as ResizeObserverSize);
-
-    if (box) {
-      measure(box.inlineSize, box.blockSize);
-      return;
-    }
-
-    const rect = element.getBoundingClientRect();
-    measure(rect.width, rect.height);
-  });
-
-  resizeObserver.observe(element, { box: "border-box" });
-
   const mutationObserver = new MutationObserver(schedule);
   mutationObserver.observe(element, {
     attributes: true,
     attributeFilter: ["class", "style"],
   });
+
+  const stopMeasuring = observeElementSize(element, measure);
 
   const scheduleOwnTransition = (event: Event): void => {
     if (event.target === element) {
@@ -107,13 +76,14 @@ export function applySquircle(
   }
 
   return () => {
+    if (disposed) return;
     disposed = true;
 
     if (frame !== 0) {
       cancelAnimationFrame(frame);
     }
 
-    resizeObserver.disconnect();
+    stopMeasuring();
     mutationObserver.disconnect();
 
     for (const type of REREAD_EVENTS) {

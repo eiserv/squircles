@@ -41,7 +41,7 @@ test("resolves percentages against the shorter axis", () => {
     { width: 200, height: 100 },
   );
 
-  // 50% of 200 is 100 horizontally, 50 vertically; the circle must fit both.
+  // 50% of 200 is 100 horizontally and 50 vertically; the circle must fit both.
   assert.equal(radii.topLeft, 50);
 });
 
@@ -147,6 +147,25 @@ test("handles negative offsets", () => {
   assert.deepEqual(parseBoxShadow("rgb(0, 0, 0) -2px -4px 8px 0px"), [
     { color: "rgb(0, 0, 0)", offsetX: -2, offsetY: -4, blur: 8, spread: 0 },
   ]);
+});
+
+test("preserves modern CSS color functions in shadows", () => {
+  for (const color of [
+    "oklch(40% 0.05 270 / 0.2)",
+    "color(display-p3 0.2 0.3 0.4 / 0.5)",
+    "hsl(120 20% 30% / 0.4)",
+    "color-mix(in oklch, color(display-p3 0.2 0.3 0.4), rgb(0, 0, 0))",
+  ]) {
+    assert.deepEqual(parseBoxShadow(`${color} 1px -2px 8px 0px`), [
+      { color, offsetX: 1, offsetY: -2, blur: 8, spread: 0 },
+    ]);
+  }
+});
+
+test("reads shadows with trailing colors or without a color", () => {
+  assert.equal(parseBoxShadow("1px 2px 4px oklch(40% 0 0)")[0].color, "oklch(40% 0 0)");
+  assert.equal(parseBoxShadow("1px 2px")[0].color, "currentColor");
+  assert.deepEqual(parseBoxShadow("unreadable"), []);
 });
 
 test("reads a solid border", () => {

@@ -23,14 +23,14 @@ type PolymorphicRef<Component extends ElementType> =
 type SquircleOwnProps = {
   as?: ElementType;
   children?: ReactNode;
-  /** Overrides the element's own `border-radius`. */
+  /** Overrides the element's CSS border-radius. */
   radius?: SquircleRadius;
-  /** Overrides the element's own `--squircle-smoothing`. */
+  /** Overrides the element's CSS --squircle-smoothing. */
   smoothing?: number;
   preserveSmoothing?: boolean;
   /**
-   * Additionally clips the element's children. Keep this false on controls
-   * whose focus outline must remain visible.
+   * Also clips children. Leave disabled on controls with focus outlines outside the
+   * shape.
    */
   clipContent?: boolean;
 };
@@ -79,11 +79,10 @@ function SquircleImplementation(
   useEffect(() => {
     const element = ref.current;
     return element ? applySquircle(element, options) : undefined;
-  }, [options]);
+  }, [Element, options]);
 
-  // The layers are appended imperatively, so a void host stays childless.
-  // createElement with two arguments omits `children` entirely, which JSX
-  // cannot express and which a void element requires.
+  // Layers are managed outside React. Two createElement arguments omit children on
+  // void HTML elements.
   const hostProps = { ref, ...elementProps };
 
   return typeof Element === "string" && isVoidElement(Element)

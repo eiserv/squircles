@@ -6,8 +6,8 @@ function read(styles: StyleReader, property: string, fallback: string): string {
 }
 
 /**
- * Only the top border is read. Per-side borders and dashed or dotted styles
- * cannot be expressed as a single SVG stroke and are out of scope.
+ * Reads only the top border. Per-side, dashed, and dotted borders cannot be
+ * represented by a single SVG stroke.
  */
 export function readBorderFromComputed(styles: StyleReader): SquircleBorder {
   const style = read(styles, "border-top-style", "none");

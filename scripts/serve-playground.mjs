@@ -12,20 +12,23 @@ const types = {
   ".map": "application/json; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".png": "image/png",
+  ".svg": "image/svg+xml",
 };
 
 const pages = {
   "/": "examples/playground.html",
   "/react": "examples/react/index.html",
   "/react/": "examples/react/index.html",
+  "/svelte": "examples/svelte/index.html",
+  "/svelte/": "examples/svelte/index.html",
 };
 
-/** Resolves a request path inside the package, or null if it escapes it. */
+/** Resolves a request path inside the package and rejects paths outside it. */
 function resolve(requestPath) {
-  // The React page is served under /react/, so its assets resolve there too.
+  // Each framework page shares a subpath with its assets.
   const relative =
     pages[requestPath] ??
-    (requestPath.startsWith("/react/")
+    (/^\/(react|svelte)\//.test(requestPath)
       ? `examples${requestPath}`
       : requestPath.slice(1));
   const target = new URL(relative, root);
@@ -47,7 +50,7 @@ const server = createServer(async (request, response) => {
     const stats = await stat(path);
 
     if (!stats.isFile()) {
-      throw new Error("not a file");
+      throw new Error("Not a file");
     }
   } catch {
     response.writeHead(404).end("Not found");
@@ -62,6 +65,7 @@ const server = createServer(async (request, response) => {
 });
 
 server.listen(port, () => {
-  console.log(`squircles playground: http://localhost:${port}/`);
-  console.log(`squircles with React:  http://localhost:${port}/react/`);
+  console.log(`squircles Playground: http://localhost:${port}/`);
+  console.log(`squircles with React:   http://localhost:${port}/react/`);
+  console.log(`squircles with Svelte:  http://localhost:${port}/svelte/`);
 });
