@@ -1,69 +1,55 @@
-import { StrictMode } from "react";
+import { StrictMode, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { Squircle } from "../../src/react/index.js";
 
-function Demo() {
+function Beispiele() {
+  const [alsLink, setzeAlsLink] = useState(false);
   return (
     <main>
       <header>
-        <h1>squircles with React</h1>
-        <p>
-          Every shape below is styled in plain CSS. The components receive no
-          paint props at all — only <code>as</code> and a class name.
-        </p>
+        <div>
+          <h1>squircles mit React</h1>
+          <p>Native Elemente mit geglätteten Ecken. Die Gestaltung bleibt im CSS.</p>
+        </div>
+        <nav aria-label="Beispiele"><a href="/">Zur Spielwiese</a><a href="/svelte/">Svelte</a></nav>
       </header>
 
-      <section>
-        <h2>Buttons</h2>
-        <div className="row">
-          <Squircle as="button" type="button" className="button">
-            Learn more
-          </Squircle>
-
-          <Squircle as="a" href="#contact" className="button button--ghost">
-            Contact
-          </Squircle>
+      <section className="beispiele" aria-labelledby="schaltflaechen">
+        <h2 id="schaltflaechen">Schaltflächen und Links</h2>
+        <div className="reihe">
+          <Squircle as="button" type="button" className="taste">Mehr erfahren</Squircle>
+          <Squircle as="a" href="#elementwechsel" className="taste taste--hell">Zu den Beispielen</Squircle>
         </div>
-        <p className="note">
-          Hover them: the fill transitions, and the geometry is not recalculated
-          for a colour change.
-        </p>
+        <p className="hinweis">Hover, Fokusmarkierung und Hintergrund werden wie gewohnt per CSS gestaltet.</p>
       </section>
 
-      <section>
-        <h2>Card, image, input, badge</h2>
-        <div className="row">
-          <Squircle as="article" className="card">
-            <Squircle
-              as="img"
-              className="card__image"
-              src="../../docs/media/playground.png"
-              alt=""
-            />
-            <div className="card__body">
-              <b>Card with a shadow</b>
-              <span>Background, border, and shadow all come from CSS.</span>
-            </div>
+      <section className="beispiele" aria-labelledby="weitere-elemente">
+        <h2 id="weitere-elemente">Karte, Bild und Eingabe</h2>
+        <div className="reihe">
+          <Squircle as="article" className="karte">
+            <Squircle as="img" className="kartenbild" src="/examples/formen.svg" alt="Zwei geglättete Formen in Grautönen" />
+            <div className="kartentext"><b>Eine Karte, weichere Ecken.</b><span>Hintergrund, Kontur und Schatten bleiben im CSS.</span></div>
           </Squircle>
-
-          <div className="stack">
-            <Squircle as="input" className="input" defaultValue="Text input" />
-            <Squircle as="span" className="badge">
-              Badge
-            </Squircle>
+          <div className="stapel">
+            <label className="feld"><span>Texteingabe</span><Squircle as="input" className="eingabe" defaultValue="Dein Text" /></label>
+            <Squircle as="span" className="markierung">Ohne zusätzliche Hülle</Squircle>
           </div>
         </div>
+      </section>
+
+      <section className="beispiele" id="elementwechsel" aria-labelledby="wechsel">
+        <h2 id="wechsel">Das Element wechseln</h2>
+        <div className="reihe">
+          <button className="taste taste--hell" type="button" onClick={() => setzeAlsLink(!alsLink)}>Element wechseln</button>
+          {alsLink
+            ? <Squircle as="a" href="#wechsel" className="taste" data-wechsel>Jetzt ein Link</Squircle>
+            : <Squircle as="button" type="button" className="taste" data-wechsel>Jetzt eine Schaltfläche</Squircle>}
+        </div>
+        <p className="hinweis">Die Form folgt dem neuen Element; alte Beobachter werden entfernt.</p>
       </section>
     </main>
   );
 }
 
 const container = document.getElementById("root");
-
-if (container) {
-  createRoot(container).render(
-    <StrictMode>
-      <Demo />
-    </StrictMode>,
-  );
-}
+if (container) createRoot(container).render(<StrictMode><Beispiele /></StrictMode>);

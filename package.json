@@ -1,7 +1,7 @@
 {
   "name": "squircles",
   "version": "0.2.1",
-  "description": "Small, dependency-free Figma-style squircle geometry with optional React components.",
+  "description": "Eckenglättung nach Figma ohne Laufzeitabhängigkeiten, mit DOM-, React- und Svelte-Anbindung.",
   "type": "module",
   "sideEffects": false,
   "files": [
@@ -30,6 +30,10 @@
     "./react": {
       "types": "./dist/react/index.d.ts",
       "import": "./dist/react/index.js"
+    },
+    "./svelte": {
+      "types": "./dist/svelte/index.d.ts",
+      "import": "./dist/svelte/index.js"
     }
   },
   "scripts": {
@@ -41,14 +45,19 @@
     "prepublishOnly": "npm run typecheck && npm test",
     "visual:fixture": "npm run build && node scripts/create-visual-fixture.mjs",
     "build:examples": "node scripts/build-examples.mjs",
-    "playground": "npm run build && npm run build:examples && node scripts/serve-playground.mjs"
+    "playground": "npm run build && npm run build:examples && node scripts/serve-playground.mjs",
+    "test:browser": "npm run build && npm run build:examples && playwright test",
+    "screenshots": "npm run build && npm run build:examples && node scripts/screenshots.mjs"
   },
   "keywords": [
     "figma",
     "react",
     "squircle",
     "corner-smoothing",
-    "typescript"
+    "typescript",
+    "svelte",
+    "vue",
+    "css"
   ],
   "license": "MIT",
   "engines": {
@@ -63,12 +72,14 @@
     }
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.0",
     "@types/node": "^24.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "esbuild": "^0.25.12",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "svelte": "^5.57.3",
     "typescript": "^6.0.0"
   },
   "publishConfig": {

@@ -12,20 +12,26 @@ const types = {
   ".map": "application/json; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".png": "image/png",
+  ".svg": "image/svg+xml",
 };
 
 const pages = {
   "/": "examples/playground.html",
   "/react": "examples/react/index.html",
   "/react/": "examples/react/index.html",
+  "/svelte": "examples/svelte/index.html",
+  "/svelte/": "examples/svelte/index.html",
 };
 
-/** Resolves a request path inside the package, or null if it escapes it. */
+/**
+ * Löst einen Anfragepfad innerhalb des Pakets auf; außerhalb liegende Pfade werden
+ * verworfen.
+ */
 function resolve(requestPath) {
-  // The React page is served under /react/, so its assets resolve there too.
+  // Die Framework-Seiten und ihre Dateien teilen sich jeweils einen Unterpfad.
   const relative =
     pages[requestPath] ??
-    (requestPath.startsWith("/react/")
+    (/^\/(react|svelte)\//.test(requestPath)
       ? `examples${requestPath}`
       : requestPath.slice(1));
   const target = new URL(relative, root);
@@ -37,7 +43,7 @@ const server = createServer(async (request, response) => {
   const target = resolve(new URL(request.url, "http://localhost").pathname);
 
   if (!target) {
-    response.writeHead(403).end("Forbidden");
+    response.writeHead(403).end("Zugriff verweigert");
     return;
   }
 
@@ -47,10 +53,10 @@ const server = createServer(async (request, response) => {
     const stats = await stat(path);
 
     if (!stats.isFile()) {
-      throw new Error("not a file");
+      throw new Error("Keine Datei");
     }
   } catch {
-    response.writeHead(404).end("Not found");
+    response.writeHead(404).end("Nicht gefunden");
     return;
   }
 
@@ -62,6 +68,7 @@ const server = createServer(async (request, response) => {
 });
 
 server.listen(port, () => {
-  console.log(`squircles playground: http://localhost:${port}/`);
-  console.log(`squircles with React:  http://localhost:${port}/react/`);
+  console.log(`squircles Spielwiese: http://localhost:${port}/`);
+  console.log(`squircles mit React:   http://localhost:${port}/react/`);
+  console.log(`squircles mit Svelte:  http://localhost:${port}/svelte/`);
 });

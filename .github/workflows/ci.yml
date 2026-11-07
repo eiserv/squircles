@@ -32,5 +32,18 @@ jobs:
 
       - run: npm ci
 
-      # Typecheck, build, tests, and a dry-run pack of the published files.
+      # Typprüfung, Erstellung, Tests und Prüfung des npm-Pakets.
       - run: npm run check
+
+  browser:
+    name: Browsertests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:browser

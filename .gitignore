@@ -1,8 +1,11 @@
 node_modules/
 dist/
 examples/react/main.js
+examples/svelte/bundle.js
 .artifacts/
 .npm-cache/
 *.tgz
 *.tsbuildinfo
 .DS_Store
+test-results/
+playwright-report/

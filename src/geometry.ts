@@ -12,21 +12,18 @@ export type SquirclePathOptions = Readonly<{
   height: number;
   radius?: SquircleRadius;
   /**
-   * Figma corner smoothing in the range 0..1.
-   * 0 is a regular rounded rectangle; 1 is fully smoothed.
+   * Eckenglättung nach Figma von 0 bis 1: 0 ergibt Kreisbögen, 1 vollständig geglättete
+   * Übergänge.
    */
   smoothing?: number;
-  /**
-   * Keeps the requested smoothing when a corner has little room.
-   * Figma-compatible budget clamping is used by default.
-   */
+  /** Erhält die Glättung bei wenig Platz. Standardmäßig wird sie wie in Figma begrenzt. */
   preserveSmoothing?: boolean;
   /**
-   * Moves the path inward on all sides and reduces the radii by the same
-   * amount. Use half a stroke width to keep an SVG stroke inside the box.
+   * Versetzt den Pfad nach innen und verkleinert die Radien entsprechend. Eine halbe
+   * Konturbreite hält die SVG-Kontur innerhalb der Fläche.
    */
   inset?: number;
-  /** Decimal places used in the generated SVG path. */
+  /** Anzahl der Nachkommastellen im erzeugten SVG-Pfad. */
   precision?: number;
 }>;
 
@@ -51,7 +48,7 @@ const DEFAULT_RADII: SquircleCornerRadii = {
 
 function assertFinite(name: string, value: number): void {
   if (!Number.isFinite(value)) {
-    throw new TypeError(`${name} must be a finite number`);
+    throw new TypeError(`${name} muss eine endliche Zahl sein`);
   }
 }
 
@@ -107,8 +104,8 @@ function insetRadii(
 }
 
 /**
- * Allocates each corner a share of both adjacent sides. This is deterministic,
- * symmetric, and guarantees that neighboring corner reaches never overlap.
+ * Verteilt den Platz beider Nachbarseiten deterministisch und symmetrisch. Benachbarte
+ * Ecken überlappen dadurch nie.
  */
 function getCornerBudgets(
   width: number,
@@ -278,11 +275,9 @@ function topLeft(curve: CornerCurve, number: (value: number) => string) {
 }
 
 /**
- * Creates a compact SVG path for Figma-style smoothed corners.
- *
- * The implementation follows Figma's published cubic Bézier construction.
- * It adds strict input handling, per-corner radii, deterministic corner
- * budgeting, and an inset mode intended for artifact-free SVG strokes.
+ * Erzeugt einen kompakten SVG-Pfad mit Eckenglättung nach Figmas Bézier-Konstruktion.
+ * Eingaben werden geprüft, Radien pro Ecke unterstützt und Konturen bei Bedarf nach
+ * innen versetzt.
  */
 export function createSquirclePath({
   width,
@@ -300,7 +295,7 @@ export function createSquirclePath({
   assertFinite("precision", precision);
 
   if (width < 0 || height < 0) {
-    throw new RangeError("width and height must be zero or greater");
+    throw new RangeError("width und height dürfen nicht negativ sein");
   }
 
   if (width === 0 || height === 0) {

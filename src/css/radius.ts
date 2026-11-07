@@ -20,8 +20,8 @@ function toPixels(value: string, basis: number): number {
 }
 
 /**
- * A squircle corner is circular, so an elliptical CSS corner is reduced to the
- * circle that fits inside it. Percentages resolve per axis first.
+ * Reduziert elliptische CSS-Ecken auf den einbeschriebenen Kreis. Prozentwerte werden
+ * vorher pro Achse aufgelöst.
  */
 function resolveCorner(value: string, size: ElementSize): number {
   const parts = value.trim().split(/\s+/).filter(Boolean);
